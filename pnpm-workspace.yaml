@@ -1,0 +1,6 @@
+packages:
+  - "client"
+  - "server"
+  - "shared"
+allowBuilds:
+  better-sqlite3: false
