@@ -46,7 +46,7 @@ export const commentRouter = router({
           },
         },
       });
-
+      console.log("COMMENTS FOUND:", comments);
       const likeQueries = comments.map((comment) =>
         ctx.user
           ? db.query.commentLikesTable.findFirst({
