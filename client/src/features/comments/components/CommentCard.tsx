@@ -12,6 +12,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/features/shared/components/ui/Dialog";
+import { trpc } from "@/router";
+import { Comment } from "@advanced-react/server/database/schema";
+import { useToast } from "@/features/shared/hooks/useToast";
 type CommentCardProps = {
   comment: CommentForList;
 };
@@ -29,6 +32,7 @@ const CommentCard = ({ comment }: CommentCardProps) => {
             setIsEditing={setIsEditing}
             isDeleting={isDeleting}
             setIsDeleting={setIsDeleting}
+            comment={comment}
           />
         )}
 
@@ -68,13 +72,39 @@ type CommentCardButtonsProps = {
   setIsEditing: (value: boolean) => void;
   isDeleting: boolean;
   setIsDeleting: (value: boolean) => void;
+  comment: Comment;
 };
 
 const CommentCardButtons = ({
   setIsEditing,
   isDeleting,
   setIsDeleting,
+  comment,
 }: CommentCardButtonsProps) => {
+  const { toast } = useToast();
+  const utils = trpc.useUtils();
+  const deleteCommentMutation = trpc.comments.delete.useMutation({
+    onError: (err) => {
+      toast({
+        title: "Failed to delete comment",
+        description: err.message,
+      });
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        utils.comments.byExperienceId.invalidate({
+          experienceId: comment.experienceId,
+        }),
+      ]);
+
+      setIsDeleting(false);
+      toast({
+        title: "Comment deleted!",
+        description: "Comment was deleted successfully!",
+        color: "green",
+      });
+    },
+  });
   return (
     <div className="flex gap-4">
       <Button variant={"link"} onClick={() => setIsEditing(true)}>
@@ -99,10 +129,15 @@ const CommentCardButtons = ({
               Cancel
             </Button>
             <Button
-              onClick={() => setIsDeleting(false)}
+              onClick={() => {
+                deleteCommentMutation.mutate({
+                  id: comment.id,
+                });
+              }}
               variant={"destructive-link"}
+              disabled={deleteCommentMutation.isPending}
             >
-              Delete
+              {deleteCommentMutation.isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
