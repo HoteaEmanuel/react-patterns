@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import ExperienceList from "@/features/experiences/Components/ExperienceList";
+import ExperienceList from "@/features/experiences/components/ExperienceList";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import { trpc } from "@/router";
 
@@ -8,6 +8,8 @@ export const Route = createFileRoute("/")({
   loader: async ({ context: { trpcQueryUtils } }) => {
     await trpcQueryUtils.experiences.feed.prefetchInfinite({});
   },
+
+
 });
 function Index() {
   const [{ pages }, experiencesQuery] =

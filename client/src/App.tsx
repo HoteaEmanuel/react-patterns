@@ -4,7 +4,7 @@ import { ThemeProvider } from "./features/shared/ThemeProvider";
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import ExperienceList from "./features/experiences/Components/ExperienceList";
+import ExperienceList from "./features/experiences/components/ExperienceList";
 import { InfiniteScroll } from "./features/shared/components/InfiniteScroll";
 import { trpc, trpcClient } from "./router";
 export function App() {
