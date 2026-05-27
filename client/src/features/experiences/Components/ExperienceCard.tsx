@@ -24,7 +24,7 @@ type ExperienceCardHeaderProps = Pick<ExperienceCardProps, "experience">;
 
 const ExperienceHeader = ({ experience }: ExperienceCardHeaderProps) => {
   return (
-    <div className="w-full space-y-4 p-2">
+    <div className="w-full space-y-4">
       <div className="">{experience.user.name}</div>
       <h2 className="text-secondary-500 dark:text-primary-500 text-xl font-bold">
         {experience.title}
@@ -43,7 +43,7 @@ type ExperienceCardMetaProps = Pick<ExperienceCardProps, "experience">;
 
 const ExperienceMeta = ({ experience }: ExperienceCardMetaProps) => {
   return (
-    <div className="">
+    <div className="space-y-4">
       <time>{new Date(experience?.scheduledAt).toLocaleString()}</time>
       {experience.url && (
         <div className="">
@@ -71,7 +71,7 @@ const ExperienceCardMetricButtons = ({
 }: ExperienceCardMetricButtonsProps) => {
   return (
     <div className="flex items-center gap-2">
-      <MessageSquare className="size-4" />
+      <MessageSquare className="size-6" />
       <span>{experience.commentsCount}</span>
     </div>
   );
@@ -83,14 +83,16 @@ const ExperienceCard = ({ experience }: ExperienceCardProps) => {
   return (
     <Card className="overflow-hidden p-0">
       <ExperienceMedia experience={experience} />
-      <ExperienceHeader experience={experience} />
-      <ExperienceContent experience={experience} />
-      <ExperienceMeta experience={experience} />
-      <ExperienceCardMetricButtons experience={experience} />
-      <CommentsSection
-        commentsCount={experience.commentsCount}
-        experienceId={experience.id}
-      />
+      <div className="space-y-2 p-2">
+        <ExperienceHeader experience={experience} />
+        <ExperienceContent experience={experience} />
+        <ExperienceMeta experience={experience} />
+        <ExperienceCardMetricButtons experience={experience} />
+        <CommentsSection
+          commentsCount={experience.commentsCount}
+          experienceId={experience.id}
+        />
+      </div>
     </Card>
   );
 };

@@ -1,6 +1,7 @@
 import { trpc } from "@/trpc";
 import { Experience } from "@advanced-react/server/database/schema";
 import CommentsList from "./CommentsList";
+import CommentCreateForm from "./CommentCreateForm";
 
 type CommentsSectionProps = {
   experienceId: Experience["id"];
@@ -23,7 +24,7 @@ const CommentsSection = ({
   if (commentsQuery.isError) return <div>Something went wrong</div>;
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">Comments {commentsCount}</div>
+      <CommentCreateForm experienceId={experienceId} />
       <CommentsList
         comments={commentsQuery.data ?? []}
         isLoading={commentsQuery.isLoading}

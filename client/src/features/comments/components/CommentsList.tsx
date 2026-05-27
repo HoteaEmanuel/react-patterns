@@ -1,7 +1,7 @@
-import { CommentForList } from "@/features/experiences/types";
+
 import Spinner from "@/features/shared/components/ui/Spinner";
-import React from "react";
 import CommentCard from "./CommentCard";
+import { CommentForList } from "../types";
 type CommentsListProps = {
   comments: CommentForList[];
   isLoading?: boolean;
@@ -10,10 +10,10 @@ type CommentsListProps = {
 const CommentsList = ({
   comments,
   isLoading,
-  noCommentsMessage = "No comments found",
+  noCommentsMessage = "No comments yet",
 }: CommentsListProps) => {
   return (
-    <div className="">
+    <div className="space-y-4">
       {comments.map((comment) => (
             <CommentCard key={comment.content} comment={comment}/>
       ))}
