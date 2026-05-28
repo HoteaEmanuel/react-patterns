@@ -3,6 +3,7 @@ import { ExperienceForList } from "../types";
 import { LinkIcon, MessageSquare } from "lucide-react";
 import Link from "@/features/shared/components/ui/Link";
 import { Button } from "@/features/shared/components/ui/Button";
+import UserAvatar from "@/features/users/components/UserAvatar";
 type ExperienceCardProps = {
   experience: ExperienceForList;
 };
@@ -26,7 +27,14 @@ type ExperienceCardHeaderProps = Pick<ExperienceCardProps, "experience">;
 const ExperienceHeader = ({ experience }: ExperienceCardHeaderProps) => {
   return (
     <div className="w-full space-y-4">
-      <div className="">{experience.user.name}</div>
+      <Link
+        to="/users/$userId"
+        params={{ userId: experience.user.id }}
+        variant={"ghost"}
+      >
+        <div className="">{experience.user.name}</div>
+      </Link>
+
       <Link
         to="/experiences/$experienceId"
         params={{ experienceId: experience.id }}
@@ -89,17 +97,34 @@ const ExperienceCardMetricButtons = ({
   );
 };
 
+type ExperienceCardAvatarProps = Pick<ExperienceCardProps, "experience">;
+
+const ExperienceCardAvatar = ({ experience }: ExperienceCardAvatarProps) => {
+  return (
+    <Link
+      to="/users/$userId"
+      params={{ userId: experience.user.id }}
+      variant={"ghost"}
+    >
+      <UserAvatar user={experience.user} showName={false} />
+    </Link>
+  );
+};
+
 const ExperienceCard = ({ experience }: ExperienceCardProps) => {
   console.log("EXPERIENCE");
   console.log(experience);
   return (
     <Card className="overflow-hidden p-0">
       <ExperienceMedia experience={experience} />
-      <div className="space-y-2 p-2">
-        <ExperienceHeader experience={experience} />
-        <ExperienceContent experience={experience} />
-        <ExperienceMeta experience={experience} />
-        <ExperienceCardMetricButtons experience={experience} />
+      <div className="flex items-start gap-2 p-2">
+        <ExperienceCardAvatar experience={experience} />
+        <div className="space-y-2 p-2">
+          <ExperienceHeader experience={experience} />
+          <ExperienceContent experience={experience} />
+          <ExperienceMeta experience={experience} />
+          <ExperienceCardMetricButtons experience={experience} />
+        </div>
       </div>
     </Card>
   );

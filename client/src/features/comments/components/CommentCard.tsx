@@ -15,6 +15,8 @@ import {
 import { trpc } from "@/router";
 import { Comment } from "@advanced-react/server/database/schema";
 import { useToast } from "@/features/shared/hooks/useToast";
+import UserAvatar from "@/features/users/components/UserAvatar";
+import Link from "@/features/shared/components/ui/Link";
 type CommentCardProps = {
   comment: CommentForList;
 };
@@ -53,8 +55,15 @@ type CommentCardHeaderProps = Pick<CommentCardProps, "comment">;
 const CommentCardHeader = ({ comment }: CommentCardHeaderProps) => {
   return (
     <div className="flex items-center gap-2">
-      <span>{comment.user.name}</span>
-      <time> {new Date(comment.createdAt).toLocaleDateString()}</time>
+      <UserAvatar user={comment.user} />
+      <Link to="/users/$userId" params={{ userId: comment.user.id }}>
+        <span>{comment.user.name} </span>
+      </Link>
+
+      <time className="text-neutral-500">
+        {" "}
+        • {new Date(comment.createdAt).toLocaleDateString()}
+      </time>
     </div>
   );
 };

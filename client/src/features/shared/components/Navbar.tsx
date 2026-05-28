@@ -1,12 +1,14 @@
-import { Home, Search } from "lucide-react";
+import { Home, Search, Settings, User } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import Link from "./ui/Link";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
 export default function Navigation() {
-  const activeLinkClassName = "bg-neutral-100 dark:bg-neutral-800";
+  const { currentUser } = useCurrentUser();
+  const activeLinkClassName = "bg-neutral-100 dark:bg-neutral-950";
 
   const navLinkClassName =
-    "rounded-lg p-2 text-lg hover:bg-red-100 dark:bg-neutral-900 flex justify-center";
+    "rounded-lg p-2 hover:bg-neutral-200 hover:dark:bg-neutral-900 text-lg  flex justify-center";
   return (
     <nav className="flex w-64 flex-col gap-4 pt-8">
       <Link
@@ -28,6 +30,28 @@ export default function Navigation() {
         <Search className="size-5" />
         Search
       </Link>
+      {!currentUser && (
+        <Link
+          to="/login"
+          variant={"ghost"}
+          className={navLinkClassName}
+          activeProps={{ className: activeLinkClassName }}
+        >
+          <User className="size-5" />
+          Sign in
+        </Link>
+      )}
+      {currentUser && (
+        <Link
+          to="/settings"
+          variant={"ghost"}
+          className={navLinkClassName}
+          activeProps={{ className: activeLinkClassName }}
+        >
+          <Settings className="size-5" />
+          Settings
+        </Link>
+      )}
       <ThemeToggle />
     </nav>
   );

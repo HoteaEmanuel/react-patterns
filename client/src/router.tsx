@@ -3,11 +3,17 @@ import { AppRouter } from "@advanced-react/server";
 import {
   createTRPCQueryUtils,
   createTRPCReact,
+  getQueryKey,
   httpBatchLink,
   TRPCClientError,
+  TRPCLink,
 } from "@trpc/react-query";
+import { observable } from "@trpc/server/observable";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import {
+  createRouter as createTanStackRouter,
+  linkOptions,
+} from "@tanstack/react-router";
 import Spinner from "./features/shared/components/ui/Spinner";
 import { routeTree } from "./routeTree.gen";
 import ErrorComponent from "./features/shared/components/ErrorComponent";
@@ -16,17 +22,53 @@ export const trpc = createTRPCReact<AppRouter>();
 
 export const queryClient = new QueryClient();
 
+export function getHeaders() {
+  const queryKey = getQueryKey(trpc.auth.currentUser);
+  const token = queryClient.getQueryData<{ accessToken: string }>(
+    queryKey,
+  )?.accessToken;
+
+  return {
+    Authorization: token ? `Bearer ${token}` : undefined,
+  };
+}
+
+export const customLink: TRPCLink<AppRouter> = () => {
+  return ({ next, op }) => {
+    return observable((observer) => {
+      const unsubscribe = next(op).subscribe({
+        next(value) {
+          observer.next(value);
+        },
+        error(err) {
+          if (err.data?.code === "UNAUTHORIZED") {
+            router.navigate({ to: "/login" });
+          }
+          observer.error(err);
+        },
+        complete() {
+          observer.complete();
+        },
+      });
+
+      return unsubscribe;
+    });
+  };
+};
+
 export const trpcClient = trpc.createClient({
   links: [
+    customLink,
+
     httpBatchLink({
       url: env.VITE_SERVER_BASE_URL,
-
-      // You can pass any HTTP headers you wish here
-      // async headers() {
-      //   return {
-      //     authorization: getAuthCookie(),
-      //   };
-      // },
+      headers: getHeaders, // tRPC calls this function on every request
+      fetch(url, options) {
+        return fetch(url, {
+          ...options,
+          credentials: "include",
+        });
+      },
     }),
   ],
 });

@@ -76,6 +76,7 @@ export const authRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      console.log("LOGIN REQUEST");
       const user = await db.query.usersTable.findFirst({
         where: eq(usersTable.email, input.email),
       });
