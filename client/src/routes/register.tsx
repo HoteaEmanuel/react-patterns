@@ -1,10 +1,18 @@
-import * as React from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/register')({
-  component: RouteComponent,
-})
+import RegisterForm from "@/features/auth/components/RegisterForm";
+import Card from "@/features/shared/components/ui/Card";
 
-function RouteComponent() {
-  return <div>Hello "/register"!</div>
+export const Route = createFileRoute("/register")({
+  component: RegisterPage,
+});
+
+function RegisterPage() {
+  return (
+    <main className="space-y-4">
+      <Card>
+        <RegisterForm />
+      </Card>
+    </main>
+  );
 }

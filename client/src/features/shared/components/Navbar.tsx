@@ -31,26 +31,51 @@ export default function Navigation() {
         Search
       </Link>
       {!currentUser && (
-        <Link
-          to="/login"
-          variant={"ghost"}
-          className={navLinkClassName}
-          activeProps={{ className: activeLinkClassName }}
-        >
-          <User className="size-5" />
-          Sign in
-        </Link>
+        <>
+          <Link
+            to="/login"
+            variant={"ghost"}
+            className={navLinkClassName}
+            activeProps={{ className: activeLinkClassName }}
+          >
+            <User className="size-5" />
+            Sign in
+          </Link>
+
+          <Link
+            to="/register"
+            variant={"ghost"}
+            className={navLinkClassName}
+            activeProps={{ className: activeLinkClassName }}
+          >
+            <User className="size-5" />
+            Sign up
+          </Link>
+        </>
       )}
       {currentUser && (
-        <Link
-          to="/settings"
-          variant={"ghost"}
-          className={navLinkClassName}
-          activeProps={{ className: activeLinkClassName }}
-        >
-          <Settings className="size-5" />
-          Settings
-        </Link>
+        <>
+          <Link
+            to="/users/$userId"
+            params={{ userId: currentUser.id }}
+            variant={"ghost"}
+            className={navLinkClassName}
+            activeProps={{ className: activeLinkClassName }}
+          >
+            <User className="size-5" />
+            Profile
+          </Link>
+
+          <Link
+            to="/settings"
+            variant={"ghost"}
+            className={navLinkClassName}
+            activeProps={{ className: activeLinkClassName }}
+          >
+            <Settings className="size-5" />
+            Settings
+          </Link>
+        </>
       )}
       <ThemeToggle />
     </nav>

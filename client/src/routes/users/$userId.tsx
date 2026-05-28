@@ -8,6 +8,8 @@ import Card from "@/features/shared/components/ui/Card";
 import ErrorComponent from "@/features/shared/components/ErrorComponent";
 import { UserForDetails } from "@/features/users/components/types";
 import { MartiniIcon } from "lucide-react";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import EditProfileDialog from "@/features/users/components/EditProfileDialog";
 
 export const Route = createFileRoute("/users/$userId")({
   component: UserPage,
@@ -56,7 +58,7 @@ function UserPage() {
             <p className="text-neutral-600 dark:text-neutral-400">{user.bio}</p>
           )}
         </div>
-
+        <UserProfileButton user={user} />
         <UserProfileHostStats user={user} />
         <h2 className="text-xl font-semibold">Experiences</h2>
         <InfiniteScroll
@@ -94,4 +96,15 @@ const UserProfileHostStats = ({ user }: UserProfileHostStatsProps) => {
       </div>
     </Card>
   );
+};
+
+type UserProfileButtonsProps = {
+  user: UserForDetails;
+};
+
+const UserProfileButton = ({ user }: UserProfileButtonsProps) => {
+  const { currentUser } = useCurrentUser();
+  const isCurrentUser = currentUser?.id === user.id;
+
+  if (isCurrentUser) return <EditProfileDialog user={user} />;
 };

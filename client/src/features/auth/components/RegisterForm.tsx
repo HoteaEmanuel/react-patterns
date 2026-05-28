@@ -1,7 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { userCredentialsSchema } from "../../../../../shared/schema/auth";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -11,55 +11,72 @@ import {
   FormMessage,
 } from "@/features/shared/components/ui/Form";
 import Input from "@/features/shared/components/ui/Input";
-import { router, trpc } from "@/router";
-import { Button } from "@/features/shared/components/ui/Button";
-import { useToast } from "@/features/shared/hooks/useToast";
 import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/features/shared/components/ui/Button";
+import { router, trpc } from "@/router";
+import { useToast } from "@/features/shared/hooks/useToast";
 import { useState } from "react";
 import Link from "@/features/shared/components/ui/Link";
-
-const loginCredentialsSchema = userCredentialsSchema.omit({
-  name: true,
-});
-type LoginFormData = z.infer<typeof loginCredentialsSchema>;
-
-const LoginForm = () => {
+type RegisterData = z.infer<typeof userCredentialsSchema>;
+const RegisterForm = () => {
   const utils = trpc.useUtils();
   const { toast } = useToast();
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginCredentialsSchema),
+  const form = useForm<RegisterData>({
+    resolver: zodResolver(userCredentialsSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
-  const loginMutation = trpc.auth.login.useMutation({
+  const [showPassword, setShowPassword] = useState(false);
+
+  const registerMutation = trpc.auth.register.useMutation({
     onError: (err) => {
       toast({
-        title: "Failed to log in",
+        title: "Failed to register",
         description: err.message,
         variant: "destructive",
       });
     },
     onSuccess: async () => {
       await utils.auth.currentUser.invalidate();
-      router.navigate({ to: "/" });
       toast({
-        title: "Logged in successfully",
+        title: "Signed up succesfully",
+        description: "Your account was created!",
         variant: "success",
       });
+
+      return router.navigate({ to: "/" });
     },
   });
 
-  const handleSubmit = form.handleSubmit((data) => {
-    loginMutation.mutate(data);
-  });
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const handleSubmit = form.handleSubmit((data) =>
+    registerMutation.mutate(data),
+  );
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-        <h1 className="text-center text-2xl font-semibold">Sign in</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <h2 className="text-center text-2xl font-bold">Create a new account</h2>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="text"
+                  value={field.value ?? ""}
+                  placeholder="Your name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="email"
@@ -93,14 +110,14 @@ const LoginForm = () => {
                       type={showPassword ? "text" : "password"}
                       value={field.value ?? ""}
                       placeholder="********"
-                      className="pr-5"
+                      className="pr-6"
                     />
 
                     <Button
                       type="button"
                       variant="ghost"
                       className="absolute right-2 h-0 p-0"
-                      onClick={() => setShowPassword((prev) => !prev)}
+                      onClick={() => setShowPassword((prev: boolean) => !prev)}
                     >
                       {!showPassword ? (
                         <Eye className="size-4" />
@@ -116,16 +133,19 @@ const LoginForm = () => {
           )}
         />
 
-        <Button type="submit" disabled={loginMutation.isPending}>
-          {loginMutation.isPending ? "Logging in..." : "Log in"}
+        <Button type="submit" disabled={registerMutation.isPending}>
+          {registerMutation.isPending ? "Creating account..." : "Register"}
         </Button>
       </form>
 
-      <span className="mt-5 text-sm  flex justify-center gap-2">
-        Don't have an account ? - <Link to="/register" variant={"secondary"}> Register</Link>
+      <span className="mt-5 flex justify-center gap-2">
+        Already have an account ? -{" "}
+        <Link to="/login" variant={"secondary"}>
+          Log in
+        </Link>
       </span>
     </Form>
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
