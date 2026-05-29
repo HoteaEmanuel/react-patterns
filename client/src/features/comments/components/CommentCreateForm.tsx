@@ -14,6 +14,7 @@ import { TextArea } from "@/features/shared/components/ui/TextArea";
 import { Button } from "@/features/shared/components/ui/Button";
 import { trpc } from "@/router";
 import { useToast } from "@/features/shared/hooks/useToast";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
 type CommentCreateFormData = z.infer<typeof commentValidationSchema>;
 
@@ -24,6 +25,7 @@ type CommentCreateFormProps = {
 const CommentCreateForm = ({ experienceId }: CommentCreateFormProps) => {
   const { toast } = useToast();
   const utils = trpc.useUtils();
+  const { currentUser } = useCurrentUser();
   const form = useForm<CommentCreateFormData>({
     resolver: zodResolver(commentValidationSchema),
     defaultValues: {
@@ -55,6 +57,14 @@ const CommentCreateForm = ({ experienceId }: CommentCreateFormProps) => {
       experienceId,
     });
   });
+
+  if (!currentUser)
+    return (
+      <div className="text-center">
+        <h2 className="font-semibold">Please log in to add comments</h2>
+      </div>
+    );
+
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit} className="space-y-4">

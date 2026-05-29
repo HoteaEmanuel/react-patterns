@@ -52,11 +52,12 @@ function ExperienceEditPage() {
   }
 
   return (
-    <main className="">
+    <main className="space-y-4">
       <h1 className="text-2xl font-semibold">Edit Experience</h1>
       <ExperienceForm
         experience={experience}
         onSuccess={navigateToExperience}
+        onClose={navigateToExperience}
       />
     </main>
   );

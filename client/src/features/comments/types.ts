@@ -1,7 +1,14 @@
-import { User,Comment } from "@advanced-react/server/database/schema";
+import {
+  User,
+  Comment,
+  Experience,
+} from "@advanced-react/server/database/schema";
 
-type CommentWithUser=Comment & {
-    user:User
-}
+type CommentWithUser = Comment & {
+  user: User;
+};
 
-export type CommentForList=CommentWithUser;
+export type CommentWithExperience = Comment & {
+  experience: Experience;
+};
+export type CommentForList = CommentWithUser & CommentWithExperience;

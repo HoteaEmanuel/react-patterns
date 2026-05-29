@@ -5,6 +5,9 @@ import { Experience } from "@advanced-react/server/database/schema";
 import { LinkIcon } from "lucide-react";
 import Link from "@/features/shared/components/ui/Link";
 import { Button } from "@/features/shared/components/ui/Button";
+import ExperienceDeleteDialog from "./ExperienceDeleteDialog";
+import { router } from "@/router";
+import ExperienceAttendButton from "./ExperienceAttendButton";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -93,20 +96,28 @@ type ExperienceCardOwnerProps = {
 
 const ExperienceOwnerButtons = ({ experience }: ExperienceCardOwnerProps) => {
   return (
-    <Button asChild className="size-10" variant={"ghost"}>
-      <Link
-        to="/experiences/$experienceId/edit"
-        params={{ experienceId: experience.id }}
-        variant={"ghost"}
-      >
-        Edit
-      </Link>
-    </Button>
+    <div className="flex gap-4">
+      <Button asChild className="size-10" variant={"ghost"}>
+        <Link
+          to="/experiences/$experienceId/edit"
+          params={{ experienceId: experience.id }}
+          variant={"ghost"}
+        >
+          Edit
+        </Link>
+      </Button>
+      <ExperienceDeleteDialog
+        experienceId={experience.id}
+        onSuccess={() => {
+          router.navigate({ to: "/" });
+        }}
+      />
+    </div>
   );
 };
 
 type ExperienceCardActionButtonsProps = {
-  experience: Experience;
+  experience: ExperienceForDetails;
 };
 const ExperienceCardActionButtons = ({
   experience,
@@ -114,7 +125,19 @@ const ExperienceCardActionButtons = ({
   const { currentUser } = useCurrentUser();
 
   if (currentUser?.id === experience.userId)
-    return <ExperienceOwnerButtons experience={experience} />;
+    return (
+      <div className=" ">
+        <ExperienceOwnerButtons experience={experience} />
+      </div>
+    );
+
+    if (currentUser)
+    return (
+      <ExperienceAttendButton
+        experienceId={experience.id}
+        isAttending={experience.isAttending}
+      />
+    );
 
   return null;
 };

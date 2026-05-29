@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CommentForList } from "../types";
+import { CommentForList, CommentWithExperience } from "../types";
 import Card from "@/features/shared/components/ui/Card";
 import { Button } from "@/features/shared/components/ui/Button";
 import CommentEditForm from "./CommentEditForm";
@@ -17,10 +17,10 @@ import { Comment } from "@advanced-react/server/database/schema";
 import { useToast } from "@/features/shared/hooks/useToast";
 import UserAvatar from "@/features/users/components/UserAvatar";
 import Link from "@/features/shared/components/ui/Link";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 type CommentCardProps = {
   comment: CommentForList;
 };
-
 const CommentCard = ({ comment }: CommentCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -28,7 +28,7 @@ const CommentCard = ({ comment }: CommentCardProps) => {
     <div>
       <Card className="space-y-4">
         <CommentCardHeader comment={comment} />
-        <CommentCardContent comment={comment} />
+        {!isEditing && <CommentCardContent comment={comment} />}
         {!isEditing && (
           <CommentCardButtons
             setIsEditing={setIsEditing}
@@ -81,7 +81,7 @@ type CommentCardButtonsProps = {
   setIsEditing: (value: boolean) => void;
   isDeleting: boolean;
   setIsDeleting: (value: boolean) => void;
-  comment: Comment;
+  comment: CommentWithExperience;
 };
 
 const CommentCardButtons = ({
@@ -92,6 +92,7 @@ const CommentCardButtons = ({
 }: CommentCardButtonsProps) => {
   const { toast } = useToast();
   const utils = trpc.useUtils();
+  const { currentUser } = useCurrentUser();
   const deleteCommentMutation = trpc.comments.delete.useMutation({
     onError: (err) => {
       toast({
@@ -114,43 +115,49 @@ const CommentCardButtons = ({
       });
     },
   });
+  const isCommentOwner = currentUser?.id === comment.userId;
+  const isExperienceOwner = currentUser?.id === comment.experience.userId;
+  if (!currentUser) return null;
   return (
     <div className="flex gap-4">
-      <Button variant={"link"} onClick={() => setIsEditing(true)}>
-        Edit
-      </Button>
+      {isCommentOwner && (
+        <Button variant={"link"} onClick={() => setIsEditing(true)}>
+          Edit
+        </Button>
+      )}
+      {(isCommentOwner || isExperienceOwner) && (
+        <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
+          <DialogTrigger asChild>
+            <Button variant={"destructive-link"}>Delete</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete comment</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this comment? This action cannot
+                be undone
+              </DialogDescription>
+            </DialogHeader>
 
-      <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
-        <DialogTrigger asChild>
-          <Button variant={"destructive-link"}>Delete</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete comment</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this comment? This action cannot
-              be undone
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button onClick={() => setIsDeleting(false)} variant={"link"}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                deleteCommentMutation.mutate({
-                  id: comment.id,
-                });
-              }}
-              variant={"destructive-link"}
-              disabled={deleteCommentMutation.isPending}
-            >
-              {deleteCommentMutation.isPending ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button onClick={() => setIsDeleting(false)} variant={"link"}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  deleteCommentMutation.mutate({
+                    id: comment.id,
+                  });
+                }}
+                variant={"destructive-link"}
+                disabled={deleteCommentMutation.isPending}
+              >
+                {deleteCommentMutation.isPending ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

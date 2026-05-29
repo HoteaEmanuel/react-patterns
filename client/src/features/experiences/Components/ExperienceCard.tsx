@@ -5,6 +5,8 @@ import Link from "@/features/shared/components/ui/Link";
 import { Button } from "@/features/shared/components/ui/Button";
 import UserAvatar from "@/features/users/components/UserAvatar";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import ExperienceDeleteDialog from "./ExperienceDeleteDialog";
+import ExperienceAttendButton from "./ExperienceAttendButton";
 type ExperienceCardProps = {
   experience: ExperienceForList;
 };
@@ -112,6 +114,43 @@ const ExperienceCardAvatar = ({ experience }: ExperienceCardAvatarProps) => {
   );
 };
 
+type ExperienceCardOwnerProps = Pick<ExperienceCardProps, "experience">;
+const ExperienceOwnerButtons = ({ experience }: ExperienceCardOwnerProps) => {
+  return (
+    <div className="flex gap-4">
+      <Link
+        to="/experiences/$experienceId/edit"
+        params={{ experienceId: experience.id }}
+        variant={"underline"}
+      >
+        Edit
+      </Link>
+
+      <ExperienceDeleteDialog experienceId={experience.id} />
+    </div>
+  );
+};
+
+type ExperienceCardActionButtonsProps = Pick<ExperienceCardProps, "experience">;
+const ExperienceCardActionButtons = ({
+  experience,
+}: ExperienceCardActionButtonsProps) => {
+  const { currentUser } = useCurrentUser();
+
+  if (currentUser?.id === experience.userId)
+    return <ExperienceOwnerButtons experience={experience} />;
+
+  if (currentUser)
+    return (
+      <ExperienceAttendButton
+        experienceId={experience.id}
+        isAttending={experience.isAttending}
+      />
+    );
+
+  return null;
+};
+
 const ExperienceCard = ({ experience }: ExperienceCardProps) => {
   console.log("EXPERIENCE");
   console.log(experience);
@@ -132,29 +171,4 @@ const ExperienceCard = ({ experience }: ExperienceCardProps) => {
   );
 };
 
-type ExperienceCardOwnerProps = Pick<ExperienceCardProps, "experience">;
-const ExperienceOwnerButtons = ({ experience }: ExperienceCardOwnerProps) => {
-  return (
-    <Link
-      to="/experiences/$experienceId/edit"
-      params={{ experienceId: experience.id }}
-      className="text-sm"
-      variant={"underline"}
-    >
-      Edit
-    </Link>
-  );
-};
-
-type ExperienceCardActionButtonsProps = Pick<ExperienceCardProps, "experience">;
-const ExperienceCardActionButtons = ({
-  experience,
-}: ExperienceCardActionButtonsProps) => {
-  const { currentUser } = useCurrentUser();
-
-  if (currentUser?.id === experience.userId)
-    return <ExperienceOwnerButtons experience={experience} />;
-
-  return null;
-};
 export default ExperienceCard;

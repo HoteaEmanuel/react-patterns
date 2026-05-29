@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/router";
 import { useToast } from "@/features/shared/hooks/useToast";
 import { User } from "@advanced-react/server/database/schema";
+import FileInput from "@/features/shared/components/ui/FileInput";
 
 type UserEditData = z.infer<typeof userEditSchema>;
 
@@ -129,6 +130,26 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                name="photo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <FileInput
+                        previewUrl={user.avatarUrl ?? ''}
+                        accept="image/*"
+                        onChange={(event) =>
+                          field.onChange(event.target?.files?.[0])
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <DialogFooter>
                 <div className="flex gap-4">
                   <Button
@@ -140,7 +161,7 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
                   <Button
                     type="button"
                     onClick={() => setShowEditProfileDialog(false)}
-                    variant={"link"}  
+                    variant={"link"}
                   >
                     Cancel
                   </Button>

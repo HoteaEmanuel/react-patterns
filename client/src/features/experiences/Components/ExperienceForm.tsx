@@ -1,4 +1,3 @@
-import React from "react";
 import { z } from "zod";
 import { experienceValidationSchema } from "../../../../../shared/schema/experience";
 import { useForm } from "react-hook-form";
@@ -12,21 +11,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/features/shared/components/ui/Form";
-import { trpc } from "@/router";
 import Input from "@/features/shared/components/ui/Input";
 import Card from "@/features/shared/components/ui/Card";
 import { useExperienceMutation } from "../hooks/useExperienceMutation";
-import { formData } from "zod-form-data";
 import { Button } from "@/features/shared/components/ui/Button";
+import FileInput from "@/features/shared/components/ui/FileInput";
 
 type ExperienceFormData = z.infer<typeof experienceValidationSchema>;
 
 type ExperienceFormProps = {
   experience: Experience;
   onSuccess: () => void;
+  onClose: () => void;
 };
 
-const ExperienceForm = ({ experience, onSuccess }: ExperienceFormProps) => {
+const ExperienceForm = ({
+  experience,
+  onSuccess,
+  onClose,
+}: ExperienceFormProps) => {
   const form = useForm<ExperienceFormData>({
     resolver: zodResolver(experienceValidationSchema),
     defaultValues: {
@@ -101,9 +104,53 @@ const ExperienceForm = ({ experience, onSuccess }: ExperienceFormProps) => {
             )}
           />
 
-          <FormLabel>
-            <Button disabled={editMutation.isPending} type="submit" >
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Link</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="text"
+                    value={field.value ?? ""}
+                    defaultValue={experience.content}
+                    placeholder="Experience link"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Link</FormLabel>
+                <FormControl>
+                  <FileInput
+                    previewUrl={experience.imageUrl ?? ""}
+                    accept="image/*"
+                    onChange={(event) =>
+                      field.onChange(event?.target?.files?.[0])
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormLabel className="flex justify-end gap-2">
+            <Button disabled={editMutation.isPending} type="submit">
               {editMutation.isPending ? "Updating..." : "Edit"}
+            </Button>
+
+            <Button onClick={onClose} variant={"ghost"}>
+              Close
             </Button>
           </FormLabel>
         </form>

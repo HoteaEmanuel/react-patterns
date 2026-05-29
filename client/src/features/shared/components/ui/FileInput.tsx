@@ -5,8 +5,16 @@ import Input from "./Input";
 
 export type FileInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-export default function FileInput({ onChange, ...props }: FileInputProps) {
-  const [preview, setPreview] = useState<string>();
+type FileInputPropsWithPreview = FileInputProps & {
+  previewUrl?: string;
+};
+
+export default function FileInput({
+  onChange,
+  previewUrl,
+  ...props
+}: FileInputPropsWithPreview) {
+  const [preview, setPreview] = useState<string>(previewUrl ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -58,7 +66,7 @@ export default function FileInput({ onChange, ...props }: FileInputProps) {
           <button
             type="button"
             onClick={handleClear}
-            className="absolute -right-2 -top-2 rounded-full bg-neutral-900 p-1 text-white hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+            className="absolute -top-2 -right-2 rounded-full bg-neutral-900 p-1 text-white hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
           >
             <X className="h-3 w-3" />
           </button>

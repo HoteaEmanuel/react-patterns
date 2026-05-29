@@ -10,7 +10,7 @@ export default function Navigation() {
   const navLinkClassName =
     "rounded-lg p-2 hover:bg-neutral-200 hover:dark:bg-neutral-900 text-lg  flex justify-center";
   return (
-    <nav className="flex w-64 flex-col gap-4 pt-8">
+    <nav className="flex w-64 flex-col gap-4 pt-8 sticky h-screen">
       <Link
         to="/"
         variant="ghost"

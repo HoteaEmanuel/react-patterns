@@ -16,7 +16,7 @@ export function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="system">
           <Toaster />
-          <div className="flex justify-center gap-8 pb-8">
+          <div className="flex flex-col justify-center gap-8 pb-8 overflow-y-hidden border-2 border-blue-500">
             <Navbar />
             <div className="min-h-screen w-full max-w-2xl">
               <header className="mb-4 border-b border-neutral-200 p-4 dark:border-neutral-800">

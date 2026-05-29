@@ -12,9 +12,9 @@ const ExperienceList = ({
   noExperiencesMessage = "No experiences found",
 }: ExperinceListProps) => {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 overflow-y-auto">
       {isLoading && (
-        <div className="flex justify-center">
+        <div className="flex justify-center">s
           <Spinner />
         </div>
       )}
