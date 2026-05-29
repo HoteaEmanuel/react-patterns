@@ -59,25 +59,26 @@ function UserPage() {
           )}
         </div>
         <UserProfileButton user={user} />
-        <UserProfileHostStats user={user} />
-        <h2 className="text-xl font-semibold">Experiences</h2>
-        <InfiniteScroll
-          onLoadMore={experiencesQuery.fetchNextPage}
-          threshold={500}
-        >
-          <ExperienceList
-            experiences={
-              experiencesQuery.data?.pages.flatMap(
-                (page) => page.experiences,
-              ) ?? []
-            }
-            isLoading={
-              experiencesQuery.isLoading || experiencesQuery.isFetchingNextPage
-            }
-            noExperiencesMessage="No experiences yet"
-          />
-        </InfiniteScroll>
       </Card>
+
+      <UserProfileHostStats user={user} />
+      <h2 className="text-xl font-semibold">Experiences</h2>
+      <InfiniteScroll
+        onLoadMore={experiencesQuery.fetchNextPage}
+        threshold={500}
+      >
+        <ExperienceList
+          experiences={
+            experiencesQuery.data?.pages.flatMap((page) => page.experiences) ??
+            []
+          }
+          isLoading={
+            experiencesQuery.isLoading || experiencesQuery.isFetchingNextPage
+          }
+          noExperiencesMessage="No experiences yet"
+        />
+      </InfiniteScroll>
+      {/* </Card> */}
     </main>
   );
 }

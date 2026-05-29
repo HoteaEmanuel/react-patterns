@@ -4,6 +4,7 @@ import { LinkIcon, MessageSquare } from "lucide-react";
 import Link from "@/features/shared/components/ui/Link";
 import { Button } from "@/features/shared/components/ui/Button";
 import UserAvatar from "@/features/users/components/UserAvatar";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 type ExperienceCardProps = {
   experience: ExperienceForList;
 };
@@ -124,10 +125,36 @@ const ExperienceCard = ({ experience }: ExperienceCardProps) => {
           <ExperienceContent experience={experience} />
           <ExperienceMeta experience={experience} />
           <ExperienceCardMetricButtons experience={experience} />
+          <ExperienceCardActionButtons experience={experience} />
         </div>
       </div>
     </Card>
   );
 };
 
+type ExperienceCardOwnerProps = Pick<ExperienceCardProps, "experience">;
+const ExperienceOwnerButtons = ({ experience }: ExperienceCardOwnerProps) => {
+  return (
+    <Link
+      to="/experiences/$experienceId/edit"
+      params={{ experienceId: experience.id }}
+      className="text-sm"
+      variant={"underline"}
+    >
+      Edit
+    </Link>
+  );
+};
+
+type ExperienceCardActionButtonsProps = Pick<ExperienceCardProps, "experience">;
+const ExperienceCardActionButtons = ({
+  experience,
+}: ExperienceCardActionButtonsProps) => {
+  const { currentUser } = useCurrentUser();
+
+  if (currentUser?.id === experience.userId)
+    return <ExperienceOwnerButtons experience={experience} />;
+
+  return null;
+};
 export default ExperienceCard;

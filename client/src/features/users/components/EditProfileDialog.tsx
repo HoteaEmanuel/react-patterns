@@ -2,6 +2,7 @@ import { Button } from "@/features/shared/components/ui/Button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -15,20 +16,19 @@ import {
   FormMessage,
 } from "@/features/shared/components/ui/Form";
 import Input from "@/features/shared/components/ui/Input";
-import { Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { UserForDetails } from "./types";
 import { z } from "zod";
 import { userEditSchema } from "../../../../../shared/schema/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/router";
 import { useToast } from "@/features/shared/hooks/useToast";
+import { User } from "@advanced-react/server/database/schema";
 
 type UserEditData = z.infer<typeof userEditSchema>;
 
 type EditProfileDialogProps = {
-  user: UserForDetails;
+  user: User;
 };
 
 const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
@@ -38,8 +38,9 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
   const form = useForm<UserEditData>({
     resolver: zodResolver(userEditSchema),
     defaultValues: {
+      id: user.id,
       name: user.name,
-      bio: user?.bio || "",
+      bio: user.bio ?? "",
       photo: undefined,
     },
   });
@@ -55,8 +56,11 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
         variant: "destructive",
       });
     },
-    onSuccess: async () => {
-      await utils.auth.currentUser.invalidate();
+    onSuccess: async ({ id }) => {
+      await Promise.all([
+        utils.users.byId.invalidate({ id }),
+        utils.auth.currentUser.invalidate(),
+      ]);
       toast({
         title: "Profile updated successfully!",
         variant: "success",
@@ -66,9 +70,15 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
     },
   });
 
-  const handleSubmit = form.handleSubmit((data) =>
-    profileEditMutation.mutate(data),
-  );
+  const handleSubmit = form.handleSubmit((data) => {
+    const formData = new FormData();
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined && value !== null)
+        formData.append(key, value as string | Blob);
+    }
+    profileEditMutation.mutate(formData);
+  });
 
   return (
     <Dialog
@@ -79,6 +89,7 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
         <Button
           onClick={() => setShowEditProfileDialog(true)}
           variant={"ghost"}
+          className="mx-auto"
         >
           Edit profile
         </Button>
@@ -107,7 +118,7 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
               />
 
               <FormField
-                name="name"
+                name="bio"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Bio</FormLabel>
@@ -118,19 +129,23 @@ const EditProfileDialog = ({ user }: EditProfileDialogProps) => {
                   </FormItem>
                 )}
               />
-
-              <div className="flex gap-4">
-                <Button type="submit" disabled={profileEditMutation.isPending}>
-                  {profileEditMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => setShowEditProfileDialog(false)}
-                  variant={"link"}
-                >
-                  Cancel
-                </Button>
-              </div>
+              <DialogFooter>
+                <div className="flex gap-4">
+                  <Button
+                    type="submit"
+                    disabled={profileEditMutation.isPending}
+                  >
+                    {profileEditMutation.isPending ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setShowEditProfileDialog(false)}
+                    variant={"link"}  
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </DialogFooter>
             </form>
           </Form>
         </DialogHeader>

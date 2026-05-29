@@ -2,7 +2,8 @@ import CommentsSection from "@/features/comments/components/CommentsSection";
 import ExperienceDetails from "@/features/experiences/components/ExperienceDetails";
 import NotFoundComponent from "@/features/shared/components/NotFoundComponent";
 import { isTRPCClientError, trpc } from "@/router";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { contextProps } from "@trpc/react-query/shared";
 import { z } from "zod";
 
 export const Route = createFileRoute("/experiences/$experienceId/")({

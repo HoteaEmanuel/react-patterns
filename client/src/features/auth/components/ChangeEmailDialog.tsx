@@ -1,13 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  changeEmailSchema,
-} from "../../../../../shared/schema/auth";
+import { changeEmailSchema } from "../../../../../shared/schema/auth";
 import { z } from "zod";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -136,18 +135,23 @@ const ChangeEmailDialog = () => {
                   </div>
                 )}
               />
-              <div className="flex gap-4">
-                <Button type="submit" disabled={changeEmailMutation.isPending}>
-                  {changeEmailMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => setShowEmailChangeDialog(false)}
-                  variant={"link"}
-                >
-                  Cancel
-                </Button>
-              </div>
+              <DialogFooter>
+                <div className="flex gap-4">
+                  <Button
+                    type="submit"
+                    disabled={changeEmailMutation.isPending}
+                  >
+                    {changeEmailMutation.isPending ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setShowEmailChangeDialog(false)}
+                    variant={"link"}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </DialogFooter>
             </form>
           </Form>
         </DialogHeader>

@@ -1,6 +1,10 @@
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { ExperienceForDetails } from "../types";
 import Card from "@/features/shared/components/ui/Card";
+import { Experience } from "@advanced-react/server/database/schema";
 import { LinkIcon } from "lucide-react";
+import Link from "@/features/shared/components/ui/Link";
+import { Button } from "@/features/shared/components/ui/Button";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -14,6 +18,7 @@ const ExperienceDetails = ({ experience }: ExperienceDetailsProps) => {
         <ExperienceDetailsHeader experience={experience} />
         <ExperienceDetailsContent experience={experience} />
         <ExperienceDetailsMeta experience={experience} />
+        <ExperienceCardActionButtons experience={experience} />
       </div>
     </Card>
   );
@@ -80,5 +85,37 @@ const ExperienceDetailsMeta = ({ experience }: ExperienceDetailsMetaProps) => {
       )}
     </div>
   );
+};
+
+type ExperienceCardOwnerProps = {
+  experience: Experience;
+};
+
+const ExperienceOwnerButtons = ({ experience }: ExperienceCardOwnerProps) => {
+  return (
+    <Button asChild className="size-10" variant={"ghost"}>
+      <Link
+        to="/experiences/$experienceId/edit"
+        params={{ experienceId: experience.id }}
+        variant={"ghost"}
+      >
+        Edit
+      </Link>
+    </Button>
+  );
+};
+
+type ExperienceCardActionButtonsProps = {
+  experience: Experience;
+};
+const ExperienceCardActionButtons = ({
+  experience,
+}: ExperienceCardActionButtonsProps) => {
+  const { currentUser } = useCurrentUser();
+
+  if (currentUser?.id === experience.userId)
+    return <ExperienceOwnerButtons experience={experience} />;
+
+  return null;
 };
 export default ExperienceDetails;

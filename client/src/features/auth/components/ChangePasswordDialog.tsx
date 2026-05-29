@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -161,21 +162,23 @@ const ChangePasswordDialog = () => {
                   </div>
                 )}
               />
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={changePasswordMutation.isPending}
-                >
-                  {changePasswordMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => setShowChangePasswordDialog(false)}
-                  variant={"link"}
-                >
-                  Cancel
-                </Button>
-              </div>
+              <DialogFooter>
+                <div className="flex gap-4">
+                  <Button
+                    type="submit"
+                    disabled={changePasswordMutation.isPending}
+                  >
+                    {changePasswordMutation.isPending ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setShowChangePasswordDialog(false)}
+                    variant={"link"}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </DialogFooter>
             </form>
           </Form>
         </DialogHeader>
