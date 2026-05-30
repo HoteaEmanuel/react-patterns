@@ -1,9 +1,10 @@
 import * as React from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { z } from "zod";
-import { isTRPCClientError, trpc, trpcQueryUtils } from "@/router";
+import { isTRPCClientError, trpc } from "@/router";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import { UserList } from "@/features/users/components/UserList";
+import UserFollowButton from "@/features/users/components/UserFollowButton";
 
 export const Route = createFileRoute("/users/$userId/following")({
   component: UserFollowingPage,
@@ -51,9 +52,17 @@ function UserFollowingPage() {
             users={pages.flatMap((page) => page.items)}
             isLoading={followingQuery.isPending}
             noUsersMessage="No users following this user"
+            rightComponent={(user) => (
+              <UserFollowButton
+                targetUserId={user.id}
+                isFollowing={user.isFollowing}
+              />
+            )}
           />
         </InfiniteScroll>
       </div>
     </main>
   );
 }
+
+

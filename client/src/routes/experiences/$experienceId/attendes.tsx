@@ -5,6 +5,7 @@ import { isTRPCClientError, trpc } from "@/router";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import { User } from "lucide-react";
 import { UserList } from "@/features/users/components/UserList";
+import UserFollowButton from "@/features/users/components/UserFollowButton";
 
 export const Route = createFileRoute("/experiences/$experienceId/attendes")({
   component: ExperienceAttendesPage,
@@ -55,7 +56,7 @@ function ExperienceAttendesPage() {
         Attendes for "<span className="font-bold">{experience.title}</span>"
       </h1>
       <div>
-        <h2 className=" font-medium mb-5">Attendes ({totalAttendes})</h2>
+        <h2 className="mb-5 font-medium">Attendes ({totalAttendes})</h2>
         <InfiniteScroll
           onLoadMore={attendesQuery.fetchNextPage}
           threshold={500}
@@ -64,6 +65,12 @@ function ExperienceAttendesPage() {
             users={pages.flatMap((page) => page.attendees)}
             isLoading={attendesQuery.isPending}
             noUsersMessage="No attendes for this experience"
+            rightComponent={(user) => (
+              <UserFollowButton
+                isFollowing={user.isFollowing}
+                targetUserId={user.id}
+              />
+            )}
           />
         </InfiniteScroll>
       </div>

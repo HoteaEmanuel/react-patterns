@@ -1,18 +1,22 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { z } from "zod";
-import { isTRPCClientError, trpc } from "@/router";
-import UserAvatar from "@/features/users/components/UserAvatar";
-import ExperienceList from "@/features/experiences/components/ExperienceList";
-import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
-import Card from "@/features/shared/components/ui/Card";
-import ErrorComponent from "@/features/shared/components/ErrorComponent";
-import { UserForDetails } from "@/features/users/components/types";
-import { MartiniIcon } from "lucide-react";
-import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
-import EditProfileDialog from "@/features/users/components/EditProfileDialog";
-import Link from "@/features/shared/components/ui/Link";
+import { createFileRoute, notFound } from '@tanstack/react-router'
+import { z } from 'zod'
+import { isTRPCClientError, trpc } from '@/router'
+import UserAvatar from '@/features/users/components/UserAvatar'
+import ExperienceList from '@/features/experiences/components/ExperienceList'
+import { InfiniteScroll } from '@/features/shared/components/InfiniteScroll'
+import Card from '@/features/shared/components/ui/Card'
+import ErrorComponent from '@/features/shared/components/ErrorComponent'
+import {
+  UserForDetails,
+  UserWithContext,
+} from '@/features/users/components/types'
+import { MartiniIcon } from 'lucide-react'
+import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser'
+import EditProfileDialog from '@/features/users/components/EditProfileDialog'
+import Link from '@/features/shared/components/ui/Link'
+import UserFollowButton from '@/features/users/components/UserFollowButton'
 
-export const Route = createFileRoute("/users/$userId/")({
+export const Route = createFileRoute('/users/$userId/')({
   component: UserPage,
   params: {
     parse: (params) => ({
@@ -22,21 +26,21 @@ export const Route = createFileRoute("/users/$userId/")({
 
   loader: async ({ params, context: { trpcQueryUtils } }) => {
     try {
-      await trpcQueryUtils.users.byId.ensureData({ id: params.userId });
+      await trpcQueryUtils.users.byId.ensureData({ id: params.userId })
     } catch (error) {
-      if (isTRPCClientError(error) && error.data?.code === "NOT_FOUND")
-        throw notFound();
+      if (isTRPCClientError(error) && error.data?.code === 'NOT_FOUND')
+        throw notFound()
 
-      throw error;
+      throw error
     }
   },
-});
+})
 
 function UserPage() {
-  const params = Route.useParams();
+  const params = Route.useParams()
   const [user] = trpc.users.byId.useSuspenseQuery({
     id: params.userId,
-  });
+  })
 
   const experiencesQuery = trpc.experiences.byUserId.useInfiniteQuery(
     {
@@ -45,12 +49,12 @@ function UserPage() {
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
-  );
+  )
 
-  if (experiencesQuery.error) return <ErrorComponent />;
+  if (experiencesQuery.error) return <ErrorComponent />
   return (
     <main className="space-y-4">
-      <Card className="space-y-4">
+      <Card className="space-y-4 flex items-center justify-start flex-col">
         <div className="flex flex-col items-center justify-center gap-2">
           <UserAvatar user={user} className="size-12" showName={false} />
 
@@ -83,12 +87,12 @@ function UserPage() {
       </InfiniteScroll>
       {/* </Card> */}
     </main>
-  );
+  )
 }
 
 type UserProfileHostStatsProps = {
-  user: UserForDetails;
-};
+  user: UserForDetails
+}
 
 const UserProfileHostStats = ({ user }: UserProfileHostStatsProps) => {
   return (
@@ -99,27 +103,27 @@ const UserProfileHostStats = ({ user }: UserProfileHostStatsProps) => {
         {user.hostedExperiencesCount}
       </div>
     </Card>
-  );
-};
+  )
+}
 
 type UserProfileStatsProps = {
-  user: UserForDetails;
-};
+  user: UserForDetails
+}
 const UserProfileStats = ({ user }: UserProfileStatsProps) => {
   const stats = [
     {
-      label: "Followers",
+      label: 'Followers',
       value: user.followersCount,
       to: `/users/${user.id}/followers`,
       params: { userId: user.id },
     },
     {
-      label: "Following",
+      label: 'Following',
       value: user.followingCount,
       to: `/users/${user.id}/following`,
       params: { userId: user.id },
     },
-  ];
+  ]
   return (
     <div className="flex w-full items-center justify-center gap-8 border-y-2 border-neutral-200 py-4 dark:border-neutral-800">
       {stats.map((stat) => (
@@ -135,16 +139,20 @@ const UserProfileStats = ({ user }: UserProfileStatsProps) => {
         </Link>
       ))}
     </div>
-  );
-};
+  )
+}
 
 type UserProfileButtonsProps = {
-  user: UserForDetails;
-};
+  user: UserWithContext
+}
 
 const UserProfileButton = ({ user }: UserProfileButtonsProps) => {
-  const { currentUser } = useCurrentUser();
-  const isCurrentUser = currentUser?.id === user.id;
+  const { currentUser } = useCurrentUser()
+  const isCurrentUser = currentUser?.id === user.id
 
-  if (isCurrentUser) return <EditProfileDialog user={user} />;
-};
+  return isCurrentUser ? (
+    <EditProfileDialog user={user} />
+  ) : (
+    <UserFollowButton targetUserId={user.id} isFollowing={user.isFollowing} />
+  )
+}
