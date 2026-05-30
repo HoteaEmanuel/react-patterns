@@ -14,7 +14,7 @@ const ExperienceList = ({
   return (
     <div className="flex flex-col gap-4 overflow-y-auto">
       {isLoading && (
-        <div className="flex justify-center">s
+        <div className="flex justify-center">
           <Spinner />
         </div>
       )}

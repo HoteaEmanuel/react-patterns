@@ -10,8 +10,9 @@ import { UserForDetails } from "@/features/users/components/types";
 import { MartiniIcon } from "lucide-react";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import EditProfileDialog from "@/features/users/components/EditProfileDialog";
+import Link from "@/features/shared/components/ui/Link";
 
-export const Route = createFileRoute("/users/$userId")({
+export const Route = createFileRoute("/users/$userId/")({
   component: UserPage,
   params: {
     parse: (params) => ({
@@ -58,6 +59,8 @@ function UserPage() {
             <p className="text-neutral-600 dark:text-neutral-400">{user.bio}</p>
           )}
         </div>
+
+        <UserProfileStats user={user} />
         <UserProfileButton user={user} />
       </Card>
 
@@ -96,6 +99,42 @@ const UserProfileHostStats = ({ user }: UserProfileHostStatsProps) => {
         {user.hostedExperiencesCount}
       </div>
     </Card>
+  );
+};
+
+type UserProfileStatsProps = {
+  user: UserForDetails;
+};
+const UserProfileStats = ({ user }: UserProfileStatsProps) => {
+  const stats = [
+    {
+      label: "Followers",
+      value: user.followersCount,
+      to: `/users/${user.id}/followers`,
+      params: { userId: user.id },
+    },
+    {
+      label: "Following",
+      value: user.followingCount,
+      to: `/users/${user.id}/following`,
+      params: { userId: user.id },
+    },
+  ];
+  return (
+    <div className="flex w-full items-center justify-center gap-8 border-y-2 border-neutral-200 py-4 dark:border-neutral-800">
+      {stats.map((stat) => (
+        <Link
+          to={stat.to}
+          params={stat.params}
+          key={stat.label}
+          variant="ghost"
+          className="text-center"
+        >
+          <span className="font-medium">{stat.label}</span>
+          <span className="text-2xl font-bold">{stat.value}</span>
+        </Link>
+      ))}
+    </div>
   );
 };
 

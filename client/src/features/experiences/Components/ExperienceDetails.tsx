@@ -8,6 +8,8 @@ import { Button } from "@/features/shared/components/ui/Button";
 import ExperienceDeleteDialog from "./ExperienceDeleteDialog";
 import { router } from "@/router";
 import ExperienceAttendButton from "./ExperienceAttendButton";
+import UserAvatarList from "@/features/users/components/UserAvatarList";
+import UserAvatar from "@/features/users/components/UserAvatar";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -21,7 +23,11 @@ const ExperienceDetails = ({ experience }: ExperienceDetailsProps) => {
         <ExperienceDetailsHeader experience={experience} />
         <ExperienceDetailsContent experience={experience} />
         <ExperienceDetailsMeta experience={experience} />
+
         <ExperienceCardActionButtons experience={experience} />
+        <div className="space-y-4 border-t border-neutral-200 dark:border-neutral-700 py-4">
+          <ExperienceAttendesDetails experience={experience} />
+        </div>
       </div>
     </Card>
   );
@@ -131,7 +137,7 @@ const ExperienceCardActionButtons = ({
       </div>
     );
 
-    if (currentUser)
+  if (currentUser)
     return (
       <ExperienceAttendButton
         experienceId={experience.id}
@@ -141,4 +147,42 @@ const ExperienceCardActionButtons = ({
 
   return null;
 };
+
+type ExperienceAttendesDetailsProps = Pick<
+  ExperienceDetailsProps,
+  "experience"
+>;
+
+const ExperienceAttendesDetails = ({
+  experience,
+}: ExperienceAttendesDetailsProps) => {
+  return (
+    <div className="space-y-2">
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold">Host</h2>
+        <UserAvatarList totalCount={1} users={[experience.user]} limit={1} />
+      </div>
+      <div className="space-y-2">
+        <Link
+          to="/experiences/$experienceId/attendes"
+          params={{ experienceId: experience.id }}
+          variant={"underline"}
+        >
+          <h2 className="text-lg font-semibold">
+            Attendees ({experience.attendeesCount})
+          </h2>
+        </Link>
+
+        <UserAvatarList
+          users={experience.attendees}
+          totalCount={experience.attendeesCount}
+          limit={5}
+          experienceId={experience.id}
+          // avatarClassName="size-8"
+        />
+      </div>
+    </div>
+  );
+};
+
 export default ExperienceDetails;

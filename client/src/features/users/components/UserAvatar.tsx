@@ -21,7 +21,7 @@ const UserAvatar = ({
   showName,
 }: UserAvatarProps) => {
   return (
-    <div className="">
+    <div className="flex items-center space-x-2">
       <Avatar className={className}>
         <AvatarImage
           src={user.avatarUrl ?? undefined}
@@ -34,7 +34,7 @@ const UserAvatar = ({
       {showName && (
         <span
           className={cn(
-            "text-neutral-600 dark:text-neutral-400",
+            "text-neutral-600 dark:text-neutral-300",
             nameClassName,
           )}
         >

@@ -1,5 +1,17 @@
 import { User } from "@advanced-react/server/database/schema";
 
-export type UserForDetails = User & {
+type UserWithHostedExperiencesCount = User & {
   hostedExperiencesCount: number;
 };
+
+type UserWithFollowersCount = User & {
+  followersCount: number;
+};
+
+type UserWithFollowingCount = User & {
+  followingCount: number;
+};
+
+export type UserForDetails = UserWithHostedExperiencesCount & UserWithFollowersCount & UserWithFollowingCount ;
+
+export type UserForList = User;

@@ -1,6 +1,7 @@
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { useToast } from "@/features/shared/hooks/useToast";
 import { trpc } from "@/router";
-import { Experience } from "@advanced-react/server/database/schema";
+import { Experience, User } from "@advanced-react/server/database/schema";
 import { useParams, useSearch } from "@tanstack/react-router";
 
 type ExperienceOptionsProps = {
@@ -22,7 +23,7 @@ export function useExperienceMutation({
 }: ExperienceOptionsProps) {
   const { toast } = useToast();
   const utils = trpc.useUtils();
-
+  const { currentUser } = useCurrentUser();
   const { q: pathQ } = useSearch({ strict: false });
 
   const { userId: pathUserId } = useParams({ strict: false });
@@ -74,12 +75,150 @@ export function useExperienceMutation({
   const attendMutation = trpc.experiences.attend.useMutation({
     onMutate: async ({ id }) => {
       // Generic function for updating the isAttenting state of the experience
-      function updateExperience<T extends { isAttending: boolean }>(
-        experience: T,
-      ): T {
+      function updateExperience<
+        T extends {
+          isAttending: boolean;
+          attendeesCount: number;
+          attendees?: User[];
+        },
+      >(oldData: T): T {
         return {
-          ...experience,
+          ...oldData,
           isAttending: true,
+          attendeesCount: oldData.attendeesCount + 1,
+          ...(oldData.attendees
+            ? {
+                attendees: [currentUser, ...oldData.attendees],
+              }
+            : {}),
+        };
+      }
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await Promise.all([
+        utils.experiences.byId.cancel({ id }),
+        utils.experiences.feed.cancel(),
+        ...(pathUserId
+          ? [utils.experiences.byUserId.cancel({ id: pathUserId })]
+          : []),
+        ...(pathQ ? [utils.experiences.search.cancel()] : []),
+      ]);
+      // Snapshot of the previous value
+      const previousData = {
+        byId: utils.experiences.byId.getData({ id }),
+        feed: utils.experiences.feed.getInfiniteData(),
+        byUserId: pathUserId
+          ? utils.experiences.byUserId.getData({ id: pathUserId })
+          : undefined,
+        search: pathQ
+          ? utils.experiences.search.getInfiniteData({ q: pathQ })
+          : undefined,
+        attendes: utils.users.experienceAttendees.getInfiniteData({
+          experienceId: id,
+        }),
+      };
+
+      utils.experiences.byId.setData({ id }, (old) => {
+        if (!old) return old;
+        return updateExperience(old);
+      });
+
+      // Updating the cache, setting isAttenting to true for the experience with matching id from the feeds
+      utils.experiences.feed.setInfiniteData({}, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((p) => ({
+            ...p,
+            experiences: p.experiences.map((e) =>
+              e.id === id ? updateExperience(e) : e,
+            ),
+          })),
+        };
+      });
+      if (pathUserId) {
+        utils.experiences.byUserId.setInfiniteData(
+          { id: pathUserId },
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              pages: old.pages.map((p) => ({
+                ...p,
+                experiences: p.experiences.map((e) =>
+                  e.id === id ? updateExperience(e) : e,
+                ),
+              })),
+            };
+          },
+        );
+      }
+
+      if (pathQ) {
+        utils.experiences.search.setInfiniteData({ q: pathQ }, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((p) => ({
+              ...p,
+              experiences: p.experiences.map((e) =>
+                e.id === id ? updateExperience(e) : e,
+              ),
+            })),
+          };
+        });
+      }
+
+      // returning the previous data so that we can rollback if an error occurs
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      toast({
+        title: "Failed to attend experience",
+        description: err.message,
+        variant: "destructive",
+      });
+      // Rollback to the previous value
+      utils.experiences.byId.setData(
+        { id: variables.id },
+        context?.previousData.byId,
+      );
+      utils.experiences.feed.setInfiniteData({}, context?.previousData.feed);
+      if (pathQ) {
+        utils.experiences.search.setInfiniteData(
+          { q: pathQ },
+          context?.previousData.search,
+        );
+      }
+      if (pathUserId) {
+        utils.experiences.byUserId.setInfiniteData(
+          { id: pathUserId },
+          context?.previousData.byUserId,
+        );
+      }
+    },
+  });
+
+  const unattendMutation = trpc.experiences.unattend.useMutation({
+    onMutate: async ({ id }) => {
+      // Generic function for updating the isAttenting state of the experience
+      function updateExperience<
+        T extends {
+          isAttending: boolean;
+          attendeesCount: number;
+          attendees?: User[];
+        },
+      >(oldData: T): T {
+        return {
+          ...oldData,
+          isAttending: false,
+          attendeesCount: Math.max(0, oldData?.attendeesCount - 1),
+          ...(oldData.attendees
+            ? {
+                attendees: oldData.attendees.filter(
+                  (a) => a.id !== currentUser?.id,
+                ),
+              }
+            : {}),
         };
       }
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
@@ -155,12 +294,12 @@ export function useExperienceMutation({
       }
 
       utils.experiences.search.setInfiniteData;
-
+      // returning the previous data so that we can rollback if an error occurs
       return { previousData };
     },
     onError: (err, variables, context) => {
       toast({
-        title: "Failed to attend experience",
+        title: "Failed to cancel attendance",
         description: err.message,
         variant: "destructive",
       });
@@ -189,5 +328,6 @@ export function useExperienceMutation({
     editMutation,
     deleteMutation,
     attendMutation,
+    unattendMutation,
   };
 }

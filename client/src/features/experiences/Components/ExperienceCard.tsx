@@ -1,12 +1,13 @@
 import Card from "@/features/shared/components/ui/Card";
 import { ExperienceForList } from "../types";
-import { LinkIcon, MessageSquare } from "lucide-react";
+import { LinkIcon, MessageSquare, Users2 } from "lucide-react";
 import Link from "@/features/shared/components/ui/Link";
 import { Button } from "@/features/shared/components/ui/Button";
 import UserAvatar from "@/features/users/components/UserAvatar";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import ExperienceDeleteDialog from "./ExperienceDeleteDialog";
 import ExperienceAttendButton from "./ExperienceAttendButton";
+import UserAvatarList from "@/features/users/components/UserAvatarList";
 type ExperienceCardProps = {
   experience: ExperienceForList;
 };
@@ -87,16 +88,28 @@ const ExperienceCardMetricButtons = ({
   experience,
 }: ExperienceCardMetricButtonsProps) => {
   return (
-    <Button variant={"link"} className="flex justify-start" asChild>
-      <Link
-        to="/experiences/$experienceId"
-        variant={"ghost"}
-        params={{ experienceId: experience.id }}
-      >
-        <MessageSquare className="size-6" />
-        <span>{experience.commentsCount}</span>
-      </Link>
-    </Button>
+    <div className="flex items-center gap-2">
+      <Button variant={"link"} className="flex justify-start" asChild>
+        <Link
+          to="/experiences/$experienceId/attendes"
+          variant={"ghost"}
+          params={{ experienceId: experience.id }}
+        >
+          <Users2 className="size-5" />
+          <span>{experience.attendeesCount}</span>
+        </Link>
+      </Button>
+      <Button variant={"link"} className="flex justify-start" asChild>
+        <Link
+          to="/experiences/$experienceId"
+          variant={"ghost"}
+          params={{ experienceId: experience.id }}
+        >
+          <MessageSquare className="size-5" />
+          <span>{experience.commentsCount}</span>
+        </Link>
+      </Button>
+    </div>
   );
 };
 
@@ -157,7 +170,7 @@ const ExperienceCard = ({ experience }: ExperienceCardProps) => {
   return (
     <Card className="overflow-hidden p-0">
       <ExperienceMedia experience={experience} />
-      <div className="flex items-start gap-2 p-2">
+      <div className="flex items-start gap-4 p-2">
         <ExperienceCardAvatar experience={experience} />
         <div className="space-y-2 p-2">
           <ExperienceHeader experience={experience} />

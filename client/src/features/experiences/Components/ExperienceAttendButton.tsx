@@ -15,13 +15,14 @@ const ExperienceAttendButton = ({
   const { currentUser } = useCurrentUser();
   if (!currentUser) return null;
   if (currentUser.id === experienceId) return null;
-  const { attendMutation } = useExperienceMutation({});
+  const { attendMutation, unattendMutation } = useExperienceMutation({});
   return (
     <Button
       variant={isAttending ? "outline" : "default"}
       onClick={() => {
         if (isAttending) {
           // Cancel attendance
+          unattendMutation.mutate({ id: experienceId });
         } else {
           // Attend experience
           attendMutation.mutate({ id: experienceId });
