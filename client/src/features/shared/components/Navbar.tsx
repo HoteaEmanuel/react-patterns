@@ -1,16 +1,30 @@
-import { Home, Search, Settings, User } from "lucide-react";
+import {
+  AlarmClockIcon,
+  Bell,
+  Home,
+  Search,
+  Settings,
+  User,
+} from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import Link from "./ui/Link";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import { trpc } from "@/router";
+import { cn } from "@/lib/utils/cn";
 
 export default function Navigation() {
   const { currentUser } = useCurrentUser();
   const activeLinkClassName = "bg-neutral-100 dark:bg-neutral-950";
 
   const navLinkClassName =
-    "rounded-lg p-2 hover:bg-neutral-200 hover:dark:bg-neutral-900 text-lg  flex justify-center";
+    "rounded-lg p-2 hover:bg-neutral-200 hover:dark:bg-neutral-900 text-lg  flex";
+
+  const unreadCountQuery = trpc.notifications.unreadCount.useQuery(undefined, {
+    enabled: !!currentUser,
+  });
+
   return (
-    <nav className="flex w-64 flex-col gap-4 pt-8 sticky h-screen">
+    <nav className="sticky flex h-screen w-64 flex-col gap-4 pt-8">
       <Link
         to="/"
         variant="ghost"
@@ -55,6 +69,27 @@ export default function Navigation() {
       )}
       {currentUser && (
         <>
+          <Link
+            to="/notifications"
+            variant="ghost"
+            className={cn(
+              navLinkClassName,
+              "relative flex items-center justify-between gap-2",
+            )}
+            activeProps={{ className: activeLinkClassName }}
+          >
+            <div className="flex items-center gap-2">
+              <Bell className="size-5" />
+              Notifications
+            </div>
+
+            {unreadCountQuery.data && unreadCountQuery.data > 0 && (
+              <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
+                {" "}
+                {unreadCountQuery.data}
+              </div>
+            )}
+          </Link>
           <Link
             to="/users/$userId"
             params={{ userId: currentUser.id }}

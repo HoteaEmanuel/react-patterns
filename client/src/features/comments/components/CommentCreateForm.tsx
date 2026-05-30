@@ -44,7 +44,7 @@ const CommentCreateForm = ({ experience }: CommentCreateFormProps) => {
         }),
         utils.experiences.byId.cancel({ id: experienceId }),
       ]);
-
+      // Create an optimistic comment
       const optimisticComment: OptimisticComment = {
         id: Math.random(),
         content,
@@ -62,6 +62,7 @@ const CommentCreateForm = ({ experience }: CommentCreateFormProps) => {
         experience: utils.experiences.byId.getData({ id: experienceId }),
       };
 
+      // Optimistically update the comments list and experience's comments count
       utils.comments.byExperienceId.setData({ experienceId }, (old) => {
         if (!old) return old;
         return [optimisticComment, ...old];
@@ -74,7 +75,7 @@ const CommentCreateForm = ({ experience }: CommentCreateFormProps) => {
           commentsCount: old.commentsCount + 1,
         };
       });
-
+      // Show a toast immediately
       const { dismiss } = toast({
         title: "Comment added",
         variant: "success",
@@ -85,12 +86,14 @@ const CommentCreateForm = ({ experience }: CommentCreateFormProps) => {
 
     onSuccess: () => {
       form.reset();
+      // Invalidate so that the real comment is fetched and replaces the optimistic one
       utils.comments.byExperienceId.invalidate({ experienceId: experience.id });
       utils.experiences.byId.invalidate({ id: experience.id });
     },
     onError: (err, { experienceId }, context) => {
-      context?.dismiss?.();
+      context?.dismiss?.(); // Dismiss the optimistic toast
 
+      // Rollback to previous data
       utils.comments.byExperienceId.setData(
         { experienceId },
         context?.previousData?.byExperienceId,
