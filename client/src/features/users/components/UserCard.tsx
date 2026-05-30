@@ -4,6 +4,7 @@ import { User } from "@advanced-react/server/database/schema";
 import React from "react";
 import UserAvatar from "./UserAvatar";
 import { UserWithContext } from "./types";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
 type UserCardProps = {
   user: UserWithContext;

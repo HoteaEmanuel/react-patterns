@@ -294,6 +294,10 @@ const UserFollowButton = ({
     },
   });
 
+
+  if(!currentUser || currentUser.id === targetUserId) {
+    return null;
+  } 
   return (
     <Button
       variant={isFollowing ? "outline" : "default"}

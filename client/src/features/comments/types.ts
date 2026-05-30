@@ -12,3 +12,8 @@ export type CommentWithExperience = Comment & {
   experience: Experience;
 };
 export type CommentForList = CommentWithUser & CommentWithExperience;
+
+
+export type OptimisticComment = CommentWithUser & CommentWithExperience & {
+  optimistic: true;
+};

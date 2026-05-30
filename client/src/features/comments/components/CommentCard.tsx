@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { CommentForList, CommentWithExperience } from "../types";
+import {
+  CommentForList,
+  CommentWithExperience,
+  OptimisticComment,
+} from "../types";
 import Card from "@/features/shared/components/ui/Card";
 import { Button } from "@/features/shared/components/ui/Button";
 import CommentEditForm from "./CommentEditForm";
@@ -13,7 +17,6 @@ import {
   DialogTrigger,
 } from "@/features/shared/components/ui/Dialog";
 import { trpc } from "@/router";
-import { Comment } from "@advanced-react/server/database/schema";
 import { useToast } from "@/features/shared/hooks/useToast";
 import UserAvatar from "@/features/users/components/UserAvatar";
 import Link from "@/features/shared/components/ui/Link";
@@ -42,7 +45,7 @@ const CommentCard = ({ comment }: CommentCardProps) => {
           <CommentEditForm
             comment={comment}
             setIsEditing={setIsEditing}
-            experienceId={comment.experienceId}
+            experience={comment.experience}
           />
         )}
       </Card>
@@ -94,24 +97,67 @@ const CommentCardButtons = ({
   const utils = trpc.useUtils();
   const { currentUser } = useCurrentUser();
   const deleteCommentMutation = trpc.comments.delete.useMutation({
-    onError: (err) => {
+    onMutate: async ({ id }) => {
+      if (!currentUser) {
+        return;
+      }
+      await Promise.all([
+        utils.comments.byExperienceId.cancel({
+          experienceId: comment.experienceId,
+        }),
+        utils.experiences.byId.cancel({ id: comment.experienceId }),
+      ]);
+
+      const previousData = {
+        byExperienceId: utils.comments.byExperienceId.getData({
+          experienceId: comment.experienceId,
+        }),
+        experience: utils.experiences.byId.getData({
+          id: comment.experienceId,
+        }),
+      };
+
+      // Optimistically update the comments list and experience's comments count
+      utils.comments.byExperienceId.setData(
+        { experienceId: comment.experienceId },
+        (old) => {
+          if (!old) return old;
+          return old.filter((c) => c.id === id);
+        },
+      );
+
+      utils.experiences.byId.setData({ id: comment.experienceId }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          commentsCount: old.commentsCount - 1,
+        };
+      });
+      // Show a toast immediately
+      const { dismiss } = toast({
+        title: "Comment deleted",
+        variant: "success",
+      });
+
+      setIsDeleting(false);
+      return { previousData, dismiss };
+    },
+    onError: (err, _, context) => {
+      utils.comments.byExperienceId.setData(
+        { experienceId: comment.experienceId },
+        context?.previousData.byExperienceId,
+      );
+
+      utils.experiences.byId.setData(
+        {
+          id: comment.experienceId,
+        },
+        context?.previousData.experience,
+      );
+
       toast({
         title: "Failed to delete comment",
         description: err.message,
-      });
-    },
-    onSuccess: async () => {
-      await Promise.all([
-        utils.comments.byExperienceId.invalidate({
-          experienceId: comment.experienceId,
-        }),
-      ]);
-
-      setIsDeleting(false);
-      toast({
-        title: "Comment deleted!",
-        description: "Comment was deleted successfully!",
-        color: "green",
       });
     },
   });
@@ -121,14 +167,23 @@ const CommentCardButtons = ({
   return (
     <div className="flex gap-4">
       {isCommentOwner && (
-        <Button variant={"link"} onClick={() => setIsEditing(true)}>
+        <Button
+          variant={"link"}
+          onClick={() => setIsEditing(true)}
+          disabled={(comment as OptimisticComment).optimistic} // disable edit for optimistic comments
+        >
           Edit
         </Button>
       )}
       {(isCommentOwner || isExperienceOwner) && (
         <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
           <DialogTrigger asChild>
-            <Button variant={"destructive-link"}>Delete</Button>
+            <Button
+              variant={"destructive-link"}
+              disabled={(comment as OptimisticComment).optimistic} // disable delete for optimistic comments
+            >
+              Delete
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>

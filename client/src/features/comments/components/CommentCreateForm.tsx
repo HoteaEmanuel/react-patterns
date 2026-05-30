@@ -15,14 +15,15 @@ import { Button } from "@/features/shared/components/ui/Button";
 import { trpc } from "@/router";
 import { useToast } from "@/features/shared/hooks/useToast";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import { OptimisticComment } from "../types";
 
 type CommentCreateFormData = z.infer<typeof commentValidationSchema>;
 
 type CommentCreateFormProps = {
-  experienceId: Experience["id"];
+  experience: Experience;
 };
 
-const CommentCreateForm = ({ experienceId }: CommentCreateFormProps) => {
+const CommentCreateForm = ({ experience }: CommentCreateFormProps) => {
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const { currentUser } = useCurrentUser();
@@ -33,28 +34,83 @@ const CommentCreateForm = ({ experienceId }: CommentCreateFormProps) => {
     },
   });
   const addCommentMutation = trpc.comments.add.useMutation({
-    onError: (err) => {
+    onMutate: async ({ experienceId, content }) => {
+      if (!currentUser) {
+        return;
+      }
+      await Promise.all([
+        utils.comments.byExperienceId.cancel({
+          experienceId: experienceId,
+        }),
+        utils.experiences.byId.cancel({ id: experienceId }),
+      ]);
+
+      const optimisticComment: OptimisticComment = {
+        id: Math.random(),
+        content,
+        experienceId: experience.id,
+        userId: currentUser.id,
+        user: currentUser,
+        experience: experience,
+        optimistic: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const previousData = {
+        byExperienceId: utils.comments.byExperienceId.getData({ experienceId }),
+        experience: utils.experiences.byId.getData({ id: experienceId }),
+      };
+
+      utils.comments.byExperienceId.setData({ experienceId }, (old) => {
+        if (!old) return old;
+        return [optimisticComment, ...old];
+      });
+
+      utils.experiences.byId.setData({ id: experienceId }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          commentsCount: old.commentsCount + 1,
+        };
+      });
+
+      const { dismiss } = toast({
+        title: "Comment added",
+        variant: "success",
+      });
+
+      return { previousData, dismiss };
+    },
+
+    onSuccess: () => {
+      form.reset();
+      utils.comments.byExperienceId.invalidate({ experienceId: experience.id });
+      utils.experiences.byId.invalidate({ id: experience.id });
+    },
+    onError: (err, { experienceId }, context) => {
+      context?.dismiss?.();
+
+      utils.comments.byExperienceId.setData(
+        { experienceId },
+        context?.previousData?.byExperienceId,
+      );
+      utils.experiences.byId.setData(
+        { id: experienceId },
+        context?.previousData?.experience,
+      );
       toast({
         title: "Failed to add comment",
         description: err.message,
         variant: "destructive",
       });
     },
-    onSuccess: async () => {
-      await Promise.all([
-        utils.comments.byExperienceId.invalidate({
-          experienceId,
-        }),
-        utils.experiences.feed.invalidate({}),
-      ]);
-
-      form.reset();
-    },
   });
+
   const handleSubmit = form.handleSubmit((data) => {
     addCommentMutation.mutate({
       content: data.content,
-      experienceId,
+      experienceId: experience.id,
     });
   });
 

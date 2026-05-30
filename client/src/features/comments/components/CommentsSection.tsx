@@ -4,6 +4,7 @@ import CommentsList from "./CommentsList";
 import CommentCreateForm from "./CommentCreateForm";
 import ErrorComponent from "@/features/shared/components/ErrorComponent";
 import Card from "@/features/shared/components/ui/Card";
+import Spinner from "@/features/shared/components/ui/Spinner";
 
 type CommentsSectionProps = {
   experienceId: Experience["id"];
@@ -15,25 +16,33 @@ const CommentsSection = ({
   experienceId,
 }: CommentsSectionProps) => {
   console.log(experienceId);
-  const commentsQuery = trpc.comments.byExperienceId.useQuery(
-    {
-      experienceId: experienceId,
-    },
-    {
-      enabled: commentsCount > 0,
-    },
-  );
-  if (commentsQuery.isError) return <ErrorComponent />;
+  const commentsQuery = trpc.comments.byExperienceId.useQuery({
+    experienceId: experienceId,
+  });
+
+  const experienceQuery = trpc.experiences.byId.useQuery({ id: experienceId });
+  if (commentsQuery.error || experienceQuery.error) return <ErrorComponent />;
+
   return (
     <div className="space-y-4">
-      <Card>
-        <CommentCreateForm experienceId={experienceId} />
-      </Card>
+      <h3 className="font-semibold"> Comments ({commentsCount})</h3>
 
-      <CommentsList
-        comments={commentsQuery.data ?? []}
-        isLoading={commentsQuery.isLoading}
-      />
+      {experienceQuery.isPending || commentsQuery.isPending ? (
+        <div className="flex justify-center">
+          <Spinner />
+        </div>
+      ) : (
+        <div>
+          <Card>
+            <CommentCreateForm experience={experienceQuery.data} />
+          </Card>
+
+          <CommentsList
+            comments={commentsQuery.data ?? []}
+
+          />
+        </div>
+      )}
     </div>
   );
 };
