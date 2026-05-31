@@ -10,7 +10,6 @@ import { router } from "@/router";
 import ExperienceAttendButton from "./ExperienceAttendButton";
 import UserAvatarList from "@/features/users/components/UserAvatarList";
 import UserAvatar from "@/features/users/components/UserAvatar";
-import ExperienceFavoriteButton from "./ExperienceFavoriteButton";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -26,7 +25,7 @@ const ExperienceDetails = ({ experience }: ExperienceDetailsProps) => {
         <ExperienceDetailsMeta experience={experience} />
 
         <ExperienceCardActionButtons experience={experience} />
-        <div className="space-y-4 border-t border-neutral-200 py-4 dark:border-neutral-700">
+        <div className="space-y-4 border-t border-neutral-200 dark:border-neutral-700 py-4">
           <ExperienceAttendesDetails experience={experience} />
         </div>
       </div>
@@ -140,17 +139,10 @@ const ExperienceCardActionButtons = ({
 
   if (currentUser)
     return (
-      <div className="flex items-center gap-2">
-        <ExperienceFavoriteButton
-          experienceId={experience.id}
-          isFavorited={experience.isFavorited}
-          favoritesCount={experience.favoritesCount}
-        />
-        <ExperienceAttendButton
-          experienceId={experience.id}
-          isAttending={experience.isAttending}
-        />
-      </div>
+      <ExperienceAttendButton
+        experienceId={experience.id}
+        isAttending={experience.isAttending}
+      />
     );
 
   return null;

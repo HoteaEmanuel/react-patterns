@@ -8,7 +8,6 @@ import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import ExperienceDeleteDialog from "./ExperienceDeleteDialog";
 import ExperienceAttendButton from "./ExperienceAttendButton";
 import UserAvatarList from "@/features/users/components/UserAvatarList";
-import ExperienceFavoriteButton from "./ExperienceFavoriteButton";
 type ExperienceCardProps = {
   experience: ExperienceForList;
 };
@@ -89,12 +88,7 @@ const ExperienceCardMetricButtons = ({
   experience,
 }: ExperienceCardMetricButtonsProps) => {
   return (
-    <div className="flex w-full items-center gap-2">
-      <ExperienceFavoriteButton
-        experienceId={experience.id}
-        isFavorited={experience.isFavorited}
-        favoritesCount={experience.favoritesCount}
-      />
+    <div className="flex items-center gap-2">
       <Button variant={"link"} className="flex justify-start" asChild>
         <Link
           to="/experiences/$experienceId/attendes"
@@ -161,12 +155,10 @@ const ExperienceCardActionButtons = ({
 
   if (currentUser)
     return (
-      <div className="flex items-center gap-2">
-        <ExperienceAttendButton
-          experienceId={experience.id}
-          isAttending={experience.isAttending}
-        />
-      </div>
+      <ExperienceAttendButton
+        experienceId={experience.id}
+        isAttending={experience.isAttending}
+      />
     );
 
   return null;

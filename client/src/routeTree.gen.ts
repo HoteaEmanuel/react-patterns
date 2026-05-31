@@ -17,6 +17,7 @@ import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
 import { Route as NotificationsIndexImport } from './routes/notifications/index'
+import { Route as FavoritesIndexImport } from './routes/favorites/index'
 import { Route as UsersUserIdIndexImport } from './routes/users/$userId/index'
 import { Route as ExperiencesExperienceIdIndexImport } from './routes/experiences/$experienceId/index'
 import { Route as UsersUserIdFollowingImport } from './routes/users/$userId/following'
@@ -59,6 +60,12 @@ const IndexRoute = IndexImport.update({
 const NotificationsIndexRoute = NotificationsIndexImport.update({
   id: '/notifications/',
   path: '/notifications/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FavoritesIndexRoute = FavoritesIndexImport.update({
+  id: '/favorites/',
+  path: '/favorites/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -140,6 +147,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
+    '/favorites/': {
+      id: '/favorites/'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/notifications/': {
       id: '/notifications/'
       path: '/notifications'
@@ -200,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/favorites': typeof FavoritesIndexRoute
   '/notifications': typeof NotificationsIndexRoute
   '/experiences/$experienceId/attendes': typeof ExperiencesExperienceIdAttendesRoute
   '/experiences/$experienceId/edit': typeof ExperiencesExperienceIdEditRoute
@@ -215,6 +230,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/favorites': typeof FavoritesIndexRoute
   '/notifications': typeof NotificationsIndexRoute
   '/experiences/$experienceId/attendes': typeof ExperiencesExperienceIdAttendesRoute
   '/experiences/$experienceId/edit': typeof ExperiencesExperienceIdEditRoute
@@ -231,6 +247,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/favorites/': typeof FavoritesIndexRoute
   '/notifications/': typeof NotificationsIndexRoute
   '/experiences/$experienceId/attendes': typeof ExperiencesExperienceIdAttendesRoute
   '/experiences/$experienceId/edit': typeof ExperiencesExperienceIdEditRoute
@@ -248,6 +265,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/settings'
+    | '/favorites'
     | '/notifications'
     | '/experiences/$experienceId/attendes'
     | '/experiences/$experienceId/edit'
@@ -262,6 +280,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/settings'
+    | '/favorites'
     | '/notifications'
     | '/experiences/$experienceId/attendes'
     | '/experiences/$experienceId/edit'
@@ -276,6 +295,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/search'
     | '/settings'
+    | '/favorites/'
     | '/notifications/'
     | '/experiences/$experienceId/attendes'
     | '/experiences/$experienceId/edit'
@@ -292,6 +312,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
+  FavoritesIndexRoute: typeof FavoritesIndexRoute
   NotificationsIndexRoute: typeof NotificationsIndexRoute
   ExperiencesExperienceIdAttendesRoute: typeof ExperiencesExperienceIdAttendesRoute
   ExperiencesExperienceIdEditRoute: typeof ExperiencesExperienceIdEditRoute
@@ -307,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
+  FavoritesIndexRoute: FavoritesIndexRoute,
   NotificationsIndexRoute: NotificationsIndexRoute,
   ExperiencesExperienceIdAttendesRoute: ExperiencesExperienceIdAttendesRoute,
   ExperiencesExperienceIdEditRoute: ExperiencesExperienceIdEditRoute,
@@ -331,6 +353,7 @@ export const routeTree = rootRoute
         "/register",
         "/search",
         "/settings",
+        "/favorites/",
         "/notifications/",
         "/experiences/$experienceId/attendes",
         "/experiences/$experienceId/edit",
@@ -354,6 +377,9 @@ export const routeTree = rootRoute
     },
     "/settings": {
       "filePath": "settings.tsx"
+    },
+    "/favorites/": {
+      "filePath": "favorites/index.tsx"
     },
     "/notifications/": {
       "filePath": "notifications/index.tsx"

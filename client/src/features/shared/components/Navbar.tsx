@@ -1,6 +1,7 @@
 import {
   AlarmClockIcon,
   Bell,
+  Heart,
   Home,
   Search,
   Settings,
@@ -89,6 +90,16 @@ export default function Navigation() {
                 {unreadCountQuery.data}
               </div>
             )}
+          </Link>
+
+          <Link
+            to="/favorites"
+            variant="ghost"
+            className={navLinkClassName}
+            activeProps={{ className: activeLinkClassName }}
+          >
+            <Heart className="size-5" />
+            Favorites
           </Link>
           <Link
             to="/users/$userId"
