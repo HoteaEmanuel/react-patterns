@@ -1,7 +1,7 @@
 import Navbar from "./features/shared/components/Navbar";
 import { Toaster } from "./features/shared/components/ui/Toaster";
 import { ThemeProvider } from "./features/shared/ThemeProvider";
-
+import "leaflet/dist/leaflet.css";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ExperienceList from "./features/experiences/components/ExperienceList";

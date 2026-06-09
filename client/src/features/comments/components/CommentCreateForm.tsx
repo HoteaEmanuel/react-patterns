@@ -55,6 +55,8 @@ const CommentCreateForm = ({ experience }: CommentCreateFormProps) => {
         optimistic: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        likesCount:0,
+        isLiked:false
       };
 
       const previousData = {

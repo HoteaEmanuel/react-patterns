@@ -1,6 +1,7 @@
 import {
   AlarmClockIcon,
   Bell,
+  Edit,
   Heart,
   Home,
   Search,
@@ -12,6 +13,7 @@ import Link from "./ui/Link";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { trpc } from "@/router";
 import { cn } from "@/lib/utils/cn";
+import { Button } from "./ui/Button";
 
 export default function Navigation() {
   const { currentUser } = useCurrentUser();
@@ -24,6 +26,9 @@ export default function Navigation() {
     enabled: !!currentUser,
   });
 
+
+
+  const unreadCount = Number(unreadCountQuery.data ?? 0);
   return (
     <nav className="sticky flex h-screen w-64 flex-col gap-4 pt-8">
       <Link
@@ -83,13 +88,11 @@ export default function Navigation() {
               <Bell className="size-5" />
               Notifications
             </div>
-
-            {unreadCountQuery.data && unreadCountQuery.data > 0 && (
-              <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
-                {" "}
-                {unreadCountQuery.data}
-              </div>
-            )}
+              {unreadCount > 0 && (
+                <div className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </div>
+              )}
           </Link>
 
           <Link
@@ -124,6 +127,14 @@ export default function Navigation() {
         </>
       )}
       <ThemeToggle />
+      {currentUser && (
+        <Button asChild>
+          <Link to="/experiences/new" variant="ghost" className="w-full">
+            <Edit className="size-5" />
+            Create Experience
+          </Link>
+        </Button>
+      )}
     </nav>
   );
 }

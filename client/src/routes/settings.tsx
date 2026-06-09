@@ -58,7 +58,7 @@ function SettingsPage() {
           disabled={logOutMutation.isPending}
           variant="destructive"
         >
-          {logOutMutation.isPending ? "Signing out" : "Sign out"}
+          {logOutMutation.isPending ? "Signing out..." : "Sign out"}
         </Button>
       ),
     },

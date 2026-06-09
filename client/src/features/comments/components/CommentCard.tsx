@@ -21,6 +21,7 @@ import { useToast } from "@/features/shared/hooks/useToast";
 import UserAvatar from "@/features/users/components/UserAvatar";
 import Link from "@/features/shared/components/ui/Link";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import CommentLikeButton from "./CommentLikeButton";
 type CommentCardProps = {
   comment: CommentForList;
 };
@@ -32,6 +33,7 @@ const CommentCard = ({ comment }: CommentCardProps) => {
       <Card className="space-y-4">
         <CommentCardHeader comment={comment} />
         {!isEditing && <CommentCardContent comment={comment} />}
+        <CommentCardMetricButtons comment={comment} />
         {!isEditing && (
           <CommentCardButtons
             setIsEditing={setIsEditing}
@@ -77,6 +79,23 @@ const CommentCardContent = ({ comment }: CommentCardContentProps) => {
     <div className="">
       <div className="whitespace-pre-wrap">{comment.content}</div>
     </div>
+  );
+};
+
+type CommentCardMetricButtonsProps = Pick<CommentCardProps, "comment">;
+const CommentCardMetricButtons = ({
+  comment,
+}: CommentCardMetricButtonsProps) => {
+  const { currentUser } = useCurrentUser();
+  if (!currentUser) return null;
+  // if (currentUser.id === comment.userId) return null;
+  return (
+    <CommentLikeButton
+      commentId={comment.id}
+      likesCount={comment.likesCount}
+      isLiked={comment.isLiked}
+      disabled={(comment as OptimisticComment).optimistic}
+    />
   );
 };
 

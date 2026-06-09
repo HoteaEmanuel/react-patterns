@@ -9,6 +9,7 @@ import ExperienceDeleteDialog from "./ExperienceDeleteDialog";
 import ExperienceAttendButton from "./ExperienceAttendButton";
 import UserAvatarList from "@/features/users/components/UserAvatarList";
 import ExperienceFavoriteButton from "./ExperienceFavoriteButton";
+import TagList from "@/features/tags/components/TagList";
 type ExperienceCardProps = {
   experience: ExperienceForList;
 };
@@ -97,7 +98,7 @@ const ExperienceCardMetricButtons = ({
       />
       <Button variant={"link"} className="flex justify-start" asChild>
         <Link
-          to="/experiences/$experienceId/attendes"
+          to="/experiences/$experienceId/attendees"
           variant={"ghost"}
           params={{ experienceId: experience.id }}
         >
@@ -172,6 +173,11 @@ const ExperienceCardActionButtons = ({
   return null;
 };
 
+type ExperienceWithTagsProps = Pick<ExperienceCardProps, "experience">;
+const ExperienceCardTags = ({ experience }: ExperienceWithTagsProps) => {
+  return <TagList tags={experience.tags} />;
+};
+
 const ExperienceCard = ({ experience }: ExperienceCardProps) => {
   console.log("EXPERIENCE");
   console.log(experience);
@@ -180,9 +186,10 @@ const ExperienceCard = ({ experience }: ExperienceCardProps) => {
       <ExperienceMedia experience={experience} />
       <div className="flex items-start gap-4 p-2">
         <ExperienceCardAvatar experience={experience} />
-        <div className="space-y-2 p-2">
+        <div className="space-y-4 p-2">
           <ExperienceHeader experience={experience} />
           <ExperienceContent experience={experience} />
+          <ExperienceCardTags experience={experience} />
           <ExperienceMeta experience={experience} />
           <ExperienceCardMetricButtons experience={experience} />
           <ExperienceCardActionButtons experience={experience} />

@@ -4,7 +4,7 @@ import {
   ExperienceFilterParams,
   experienceFiltersSchema,
 } from "../../../shared/schema/experience";
-import { trpc } from "@/router";
+import { trpc, trpcQueryUtils } from "@/router";
 import ExperienceList from "@/features/experiences/components/ExperienceList";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import ExperienceFilters from "@/features/experiences/components/ExperienceFilters";
@@ -12,6 +12,13 @@ import ExperienceFilters from "@/features/experiences/components/ExperienceFilte
 export const Route = createFileRoute("/search")({
   component: SearchPage,
   validateSearch: experienceFiltersSchema,
+  loader: async ({ context: { trpcQueryUtils } }) => {
+    try {
+      await trpcQueryUtils.tags.list.ensureData();
+    } catch (error) {
+      throw error;
+    }
+  },
 });
 
 function SearchPage() {
@@ -21,8 +28,9 @@ function SearchPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const experiencesQuery = trpc.experiences.search.useInfiniteQuery(search, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    enabled: !!search.q,
+    enabled: !!search.q || !!search.tags || !!search.scheduledAt,
   });
+  const [tags] = trpc.tags.list.useSuspenseQuery();
 
   return (
     <main className="space-y-4">
@@ -30,9 +38,14 @@ function SearchPage() {
         onFiltersChange={(filters: ExperienceFilterParams) => {
           navigate({ search: filters });
         }}
+        tags={tags}
       />
       <InfiniteScroll
-        onLoadMore={!!search.q ? experiencesQuery.fetchNextPage : undefined}
+        onLoadMore={
+          !!search.q || !!search.tags || !!search.scheduledAt
+            ? experiencesQuery.fetchNextPage
+            : undefined
+        }
         threshold={500}
       >
         <ExperienceList

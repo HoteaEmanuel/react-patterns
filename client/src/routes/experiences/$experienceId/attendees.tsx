@@ -1,13 +1,13 @@
-import * as React from "react";
-import { createFileRoute, notFound, useParams } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { z } from "zod";
 import { isTRPCClientError, trpc } from "@/router";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
-import { User } from "lucide-react";
 import { UserList } from "@/features/users/components/UserList";
 import UserFollowButton from "@/features/users/components/UserFollowButton";
+import ExperienceKickButton from "@/features/experiences/components/ExperienceKickButton";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
-export const Route = createFileRoute("/experiences/$experienceId/attendes")({
+export const Route = createFileRoute("/experiences/$experienceId/attendees")({
   component: ExperienceAttendesPage,
   params: {
     parse: (params) => ({
@@ -40,6 +40,7 @@ function ExperienceAttendesPage() {
     id: experienceId,
   });
 
+  const { currentUser } = useCurrentUser();
   const [{ pages }, attendesQuery] =
     trpc.users.experienceAttendees.useSuspenseInfiniteQuery(
       { experienceId },
@@ -49,7 +50,7 @@ function ExperienceAttendesPage() {
     );
 
   const totalAttendes = pages[0].attendeesCount;
-
+  const isOwner = experience.userId === currentUser?.id;
   return (
     <main className="space-y-5">
       <h1 className="text-2xl font-semibold">
@@ -66,10 +67,19 @@ function ExperienceAttendesPage() {
             isLoading={attendesQuery.isPending}
             noUsersMessage="No attendes for this experience"
             rightComponent={(user) => (
-              <UserFollowButton
-                isFollowing={user.isFollowing}
-                targetUserId={user.id}
-              />
+              <div className="flex gap-4">
+                <UserFollowButton
+                  isFollowing={user.isFollowing}
+                  targetUserId={user.id}
+                />
+
+                {isOwner && (
+                  <ExperienceKickButton
+                    experienceId={experience.id}
+                    userId={user.id}
+                  />
+                )}
+              </div>
             )}
           />
         </InfiniteScroll>

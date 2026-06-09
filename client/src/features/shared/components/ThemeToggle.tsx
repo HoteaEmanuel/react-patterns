@@ -8,7 +8,7 @@ const ThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
   return (
-    <Button variant={"ghost"} className="p-2" onClick={handleToggleTheme}>
+    <Button variant={"ghost"} className="p-2 w-full flex justify-normal" onClick={handleToggleTheme}>
       {theme === "light" ? (
         <>
           Dark mode

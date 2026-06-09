@@ -11,6 +11,10 @@ import ExperienceAttendButton from "./ExperienceAttendButton";
 import UserAvatarList from "@/features/users/components/UserAvatarList";
 import UserAvatar from "@/features/users/components/UserAvatar";
 import ExperienceFavoriteButton from "./ExperienceFavoriteButton";
+import TagList from "@/features/tags/components/TagList";
+import { LocationPicker } from "@/features/shared/components/ui/LocationPicker";
+import LocationDisplay from "@/features/shared/components/LocationDisplay";
+import { LocationData } from "../../../../../shared/schema/experience";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -23,15 +27,23 @@ const ExperienceDetails = ({ experience }: ExperienceDetailsProps) => {
       <div className="space-y-4 p-2">
         <ExperienceDetailsHeader experience={experience} />
         <ExperienceDetailsContent experience={experience} />
+        <ExperienceCardTags experience={experience} />
         <ExperienceDetailsMeta experience={experience} />
 
         <ExperienceCardActionButtons experience={experience} />
         <div className="space-y-4 border-t border-neutral-200 py-4 dark:border-neutral-700">
           <ExperienceAttendesDetails experience={experience} />
         </div>
+
+        <ExperienceLocation experience={experience} />
       </div>
     </Card>
   );
+};
+
+type ExperienceWithTagsProps = Pick<ExperienceDetailsProps, "experience">;
+const ExperienceCardTags = ({ experience }: ExperienceWithTagsProps) => {
+  return <TagList tags={experience.tags} />;
 };
 
 type ExperienceDetailsMediaProps = Pick<ExperienceDetailsProps, "experience">;
@@ -172,7 +184,7 @@ const ExperienceAttendesDetails = ({
       </div>
       <div className="space-y-2">
         <Link
-          to="/experiences/$experienceId/attendes"
+          to="/experiences/$experienceId/attendees"
           params={{ experienceId: experience.id }}
           variant={"underline"}
         >
@@ -191,6 +203,17 @@ const ExperienceAttendesDetails = ({
       </div>
     </div>
   );
+};
+
+type ExperienceLocationProps = Pick<ExperienceDetailsProps, "experience">;
+const ExperienceLocation = ({ experience }: ExperienceLocationProps) => {
+  const location = experience?.location
+    ? JSON.parse(experience.location) as LocationData
+    : null;
+
+  if (!location) return null;
+
+  return <LocationDisplay location={location} zoom={13} />;
 };
 
 export default ExperienceDetails;
