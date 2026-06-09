@@ -8,6 +8,7 @@ import { trpc, trpcQueryUtils } from "@/router";
 import ExperienceList from "@/features/experiences/components/ExperienceList";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import ExperienceFilters from "@/features/experiences/components/ExperienceFilters";
+import { ExperienceForList } from "@/features/experiences/types";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
@@ -50,8 +51,9 @@ function SearchPage() {
       >
         <ExperienceList
           experiences={
-            experiencesQuery.data?.pages.flatMap((page) => page.experiences) ??
-            []
+            (experiencesQuery.data?.pages.flatMap(
+              (page) => page.experiences,
+            ) as ExperienceForList[]) ?? []
           }
           isLoading={
             experiencesQuery.isLoading || experiencesQuery.isFetchingNextPage

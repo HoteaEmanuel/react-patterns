@@ -22,11 +22,33 @@ const CommentLikeButton = ({
   const utils = trpc.useUtils();
   const { toast } = useToast();
   const { experienceId } = useParams({ strict: false });
+
+  async function handleOnMutate(
+    updateComment: <T extends { isLiked: boolean; likesCount: number }>(
+      oldData: T,
+    ) => T,
+  ) {
+    if (!experienceId) return;
+    await utils.comments.byExperienceId.cancel({ experienceId });
+    const previousData = {
+      byExperienceId: utils.comments.byExperienceId.getData({
+        experienceId,
+      }),
+    };
+
+    console.log("COMMENT CACHE BEFORE");
+    console.log(previousData.byExperienceId);
+
+    utils.comments.byExperienceId.setData({ experienceId }, (oldData) => {
+      if (!oldData) return null;
+      return oldData.map((c) => (c.id === commentId ? updateComment(c) : c));
+    });
+
+    return { previousData };
+  }
+
   const likeCommentMutation = trpc.comments.like.useMutation({
     onMutate: async () => {
-      console.log("LIKE MUTATION");
-      if (!experienceId) return;
-
       function updateComment<
         T extends { isLiked: boolean; likesCount: number },
       >(comment: T) {
@@ -36,25 +58,7 @@ const CommentLikeButton = ({
           likesCount: comment.likesCount + 1,
         };
       }
-
-      await utils.comments.byExperienceId.cancel({ experienceId });
-      const previousData = {
-        byExperienceId: utils.comments.byExperienceId.getData({
-          experienceId,
-        }),
-      };
-
-      console.log("COMMENT CACHE BEFORE");
-      console.log(previousData.byExperienceId);
-
-      utils.comments.byExperienceId.setData({ experienceId }, (oldData) => {
-        if (!oldData) return null;
-        return oldData.map((c) => (c.id === commentId ? updateComment(c) : c));
-      });
-
-      console.log("COMMENT CACHE BEFORE");
-      console.log(utils.comments.byExperienceId.getData({ experienceId }));
-      return { previousData };
+      return handleOnMutate(updateComment);
     },
     onSuccess: () => {},
     onError: (err, _variables, context) => {
@@ -73,7 +77,6 @@ const CommentLikeButton = ({
 
   const unlikeCommentMutation = trpc.comments.unlike.useMutation({
     onMutate: async () => {
-      console.log("UNLIKE MUTATIONB");
       if (!experienceId) return;
 
       function updateComment<
@@ -85,19 +88,7 @@ const CommentLikeButton = ({
           likesCount: Math.max(0, comment.likesCount - 1),
         };
       }
-
-      await utils.comments.byExperienceId.cancel({ experienceId });
-      const previousData = {
-        byExperienceId: utils.comments.byExperienceId.getData({
-          experienceId,
-        }),
-      };
-
-      utils.comments.byExperienceId.setData({ experienceId }, (oldData) => {
-        if (!oldData) return null;
-        return oldData.map((c) => (c.id === commentId ? updateComment(c) : c));
-      });
-      return { previousData };
+      return handleOnMutate(updateComment);
     },
     onSuccess: () => {},
     onError: (err, _variables, context) => {

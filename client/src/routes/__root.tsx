@@ -20,12 +20,9 @@ function Root() {
         <Navbar />
         <div className="min-h-screen w-full max-w-2xl">
           <header className="mb-4 border-b border-neutral-200 p-4 dark:border-neutral-800">
-            <h1 className="text-center text-xl font-bold">
-              Advanced Patterns React
-            </h1>
-            <p className="text-center text-sm text-neutral-500">
+            <p className="text-center text-xl text-neutral-500 font-bold">
               <b>
-                <span className="dark:text-primary-500">Cosden</span> Solutions
+               ExperienceIt
               </b>
             </p>
           </header>
