@@ -15,9 +15,11 @@ A mini modern type of  social media platform designed for users to share experie
 Build to extend my knowledge about design patterns in react, focusing on:
 * **Single-Responsibility Priciple**
 * **Optimistic updates**
-* * **Clean Code that scales**
-Also i learned Typescript
+* **Clean Code that scales**
+
   
+Also i deepened my Typescript knowledge
+   
 ## Tech Stack
 
 * **Frontend:** React, TypeScript
